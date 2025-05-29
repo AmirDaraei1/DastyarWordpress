@@ -1,13 +1,16 @@
-package ir.wordpressdashboard.api
+package ir.wordpressdashboard.feature.network
 
-import ir.wordpressdashboard.model.Product
-import javax.naming.Context
+import android.content.Context
+import ir.wordpressdashboard.feature.offlinApi.Products
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
 class MockProductApiService(
-    private val context:Context
-) {
-    override suspend fun getProduct() : Product =withCon
-
-
-
+    private val context: Context
+):ProductApiService {
+    override suspend fun getProduct() : Product = withContext(Dispatchers.IO) {
+                val jsonString = context.assets.open("mock-product.json").bufferedReader().use { it.readText() }
+                Json { ignoreUnknownKeys = true }.decodeFromString<Products>(jsonString)
+    }
 }

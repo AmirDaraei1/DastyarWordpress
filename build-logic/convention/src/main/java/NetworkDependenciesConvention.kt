@@ -1,6 +1,20 @@
-object Libs {
-    //Retrofit + Kotlinx-serialization
-    const val retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
-    const val serializationConv = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
-    const val kotlinxJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+import ir.wordpressdashboard.build_logic.convention.implementation
+import ir.wordpressdashboard.build_logic.convention.libs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
+
+class NetworkDependenciesConvention : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            with(pluginManager) {
+                apply("kotlinx-serialization")
+            }
+            dependencies {
+                implementation(libs.findLibrary("retrofit").get())
+                implementation(libs.findLibrary("retrofit2-kotlinx-serialization-converter").get())
+                implementation(libs.findLibrary("kotlinx-serialization-json").get())
+            }
+        }
+    }
 }

@@ -61,5 +61,9 @@ gradlePlugin {
             id = "dastyarwordpress.kotlin.jvm.test"
             implementationClass= "KotlinJvmTestConventionPlugin"
         }
+        register("networkDependencies") {
+            id = "dastyarwordpress.network.dependencies"
+            implementationClass = "NetworkDependenciesConventionPlugin"
+        }
     }
 }

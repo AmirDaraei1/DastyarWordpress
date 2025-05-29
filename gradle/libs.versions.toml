@@ -18,6 +18,8 @@ kotlinxSerializationJson = "1.6.3"
 ksp = "1.9.23-1.0.20"
 jetbrainsKotlinJvmVersion = "1.9.23"
 mockwebserverVersion = "4.12.0"
+retrofit = "2.9.0"
+kotlinx-serialization ="1.5.1"
 
 [libraries]
 # Compose
@@ -45,9 +47,14 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 # End
 
+#Retrofit and kotlinx-serialization
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version = "0.8.0" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+
 # Kotlin
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCoreVersion" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 # End
 
 # Dependencies of the included build-logic
@@ -78,4 +85,5 @@ dastyarwordpress-android-feature = { id = "dastyarwordpress.android.feature", ve
 dastyarwordpress-android-hilt = { id = "dastyarwordpress.android.hilt", version = "unspecified" }
 dastyarwordpress-kotlin-jvm-test = { id= "dastyarwordpress.kotlin.jvm.test" , version = "unspecified"}
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvmVersion" }
+dastyarwordpress-network-dependencies = { id= "dastyarwordpress.network.dependencies" , version="unspecified"}
 # End
