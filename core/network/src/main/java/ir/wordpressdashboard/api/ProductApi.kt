@@ -1,9 +1,9 @@
 package ir.wordpressdashboard.api
 
-import ir.wordpressdashboard.model.Product
-import retrofit2.http.GET
+import ir.wordpressdashboard.model.Products
+
 //todo for use real api service complete GET
 //@GET
 interface ProductApiService {
-    suspend fun getProduct():Product
+    suspend fun getProduct(): List<Products>
 }

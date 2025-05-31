@@ -3,7 +3,7 @@ package ir.wordpressdashboard.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Product(
+data class Products(
     val id: Int,
     val name: String,
     val price: String,
