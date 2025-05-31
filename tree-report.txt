@@ -1,0 +1,6 @@
+Folder PATH listing
+Volume serial number is F876-BCA5
+D:\MYPROJECT\DASTYARWORDPRESS-MASTER\2
+Invalid path - \MYPROJECT\DASTYARWORDPRESS-MASTER\2
+No subfolders exist 
+

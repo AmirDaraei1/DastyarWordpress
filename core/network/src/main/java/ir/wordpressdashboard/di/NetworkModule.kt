@@ -1,6 +1,6 @@
 package ir.wordpressdashboard.di
 
-import ir.wordpressdashboard.api.ProductApiService
+import ir.wordpressdashboard.api.ProductApi
 import javax.naming.Context
 
 @Module
@@ -10,7 +10,7 @@ object NetworkModule {
     @Singleton
     fun provideProductApiService(
         @ApplicationContext context: Context
-    ):ProductApiService = MockProductApiService(context)
+    ):ProductApi = MockProductApiService(context)
 
     //todo it is for real api request that should complete it in future
 //    @Provides

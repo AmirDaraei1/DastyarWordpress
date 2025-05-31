@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.feature.di
+package ir.wordpressdashboard.feature.home.di
 
-class ProductFeatureModule {
+class HomeModule {
 }

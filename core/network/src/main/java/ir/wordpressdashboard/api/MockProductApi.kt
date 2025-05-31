@@ -3,7 +3,7 @@ package ir.wordpressdashboard.api
 import ir.wordpressdashboard.model.Products
 import ir.wordpressdashboard.model.ProductImage
 
-class MockProductApiService :ProductApiService{
+class MockProductApi :ProductApi{
     override suspend fun getProduct(): List<Products> {
         return listOf(
             Products(1,
