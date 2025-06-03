@@ -1,11 +1,10 @@
-package ir.wordpressdashboard.feature.home
+package ir.wordpressdashboard.ui
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import ir.wordpressdashboard.ui.HomeRoute
 import kotlinx.serialization.Serializable
 
 @Serializable

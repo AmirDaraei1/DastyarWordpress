@@ -1,6 +1,6 @@
 package ir.wordpressdashboard.model
 
-data class Product (
+data class Products (
     val id: Int,
     val name: String,
     val price: String,
