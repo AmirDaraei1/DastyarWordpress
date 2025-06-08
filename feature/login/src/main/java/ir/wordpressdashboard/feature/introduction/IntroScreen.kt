@@ -85,11 +85,11 @@ fun IntroductionScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = if (pagerState.currentPage < 2) Arrangement.SpaceBetween else Arrangement.End
         ) {
             if (pagerState.currentPage < 2) {
-                TextButton(onClick = { onFinish() }) {
-                    Text(text = "Skip", color = Color(0xFF673AB7))
+                TextButton( onClick = { onFinish() }) {
+                    Text(text = "رد کردن", color = Color(0xFF673AB7))
                 }
             }
 
@@ -105,7 +105,7 @@ fun IntroductionScreen(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF673AB7))
             ) {
-                Text(text = if (pagerState.currentPage == 2) "Finish" else "Next")
+                Text(text = if (pagerState.currentPage == 2) "اتمام" else "بعدی  > ")
             }
         }
     }
