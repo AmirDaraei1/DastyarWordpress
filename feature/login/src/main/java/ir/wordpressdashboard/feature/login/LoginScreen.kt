@@ -1,9 +1,12 @@
 package ir.wordpressdashboard.feature.login
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,8 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LoginRoute(navigateToHome: (userId: String) -> Unit
-               ,navigateToEnterShopAddressScreen: () -> Unit) {
+fun LoginRoute(navigateToHome: (userId: String) -> Unit) {
 //    LoginScreen {
 //        navigateToHome("123",)
 //    }
@@ -46,7 +50,7 @@ fun LoginRoute(navigateToHome: (userId: String) -> Unit
             navigateToHome("user123")
         },
         onQRCodeClick = {
-            navigateToEnterShopAddressScreen()
+            navigateToHome("user123")
         },
         onNavItemSelected = { idx ->
             selectIndex = idx
@@ -68,6 +72,14 @@ fun LoginScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        //1. Top Progress/Indicator
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.4f)
+                .height(8.dp)
+                .background(Color(0xFFB39DDB), shape = RoundedCornerShape(8.dp))
+        )
         //2. Logo/Image
         Spacer(modifier = Modifier.height(24.dp))
         Box(
@@ -105,12 +117,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onQRCodeClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF512DA8)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF512DA8))
         ) {
-            Text("اتصال با QR Code", color = Color.White)
+            Text("اتصال با QRCode")
         }
         //5. Info/Help Section
         Spacer(modifier = Modifier.height(32.dp))
@@ -139,41 +148,41 @@ fun LoginScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         // 6. Bottom Navigation
-//        BottomNavigationBar(selectIndex, onNavItemSelected)
+        BottomNavigationBar(selectIndex, onNavItemSelected)
     }
 }
 
-//@Composable
-//fun BottomNavigationBar(selectIndex: Int, onItemSelected: (Int) -> Unit) {
-//
-//    val items = listOf("حساب کاربری","محصولات","تصاویر")
-//    Row (
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(bottom = 24.dp),
-//        horizontalArrangement = Arrangement.SpaceEvenly,
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        items.forEachIndexed { idex, title ->
-//            Column (horizontalAlignment = Alignment.CenterHorizontally) {
-//                Box (
-//                    modifier = Modifier
-//                        .size(8.dp)
-//                        .background(
-//                            if (selectIndex == idex) Color(0xFF512DA8) else Color(0xFFE1BEE7),
-//                            CircleShape
-//                        )
-//                )
-//                Text(
-//                    text = title,
-//                    fontSize = 12.sp,
-//                    color = if (selectIndex == idex) Color(0xFF512DA8) else Color(0xFFBDBDBD),
-//                    modifier = Modifier.padding(top = 4.dp)
-//                )
-//            }
-//        }
-//    }
-//}
+@Composable
+fun BottomNavigationBar(selectIndex: Int, onItemSelected: (Int) -> Unit) {
+
+    val items = listOf("حساب کاربری","محصولات","تصاویر")
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items.forEachIndexed { idex, title ->
+            Column (horizontalAlignment = Alignment.CenterHorizontally) {
+                Box (
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(
+                            if (selectIndex == idex) Color(0xFF512DA8) else Color(0xFFE1BEE7),
+                            CircleShape
+                        )
+                )
+                Text(
+                    text = title,
+                    fontSize = 12.sp,
+                    color = if (selectIndex == idex) Color(0xFF512DA8) else Color(0xFFBDBDBD),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

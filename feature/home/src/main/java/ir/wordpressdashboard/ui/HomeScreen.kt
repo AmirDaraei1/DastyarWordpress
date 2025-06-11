@@ -21,10 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun HomeRoute(userId: String) {
     HomeScreen(userId = userId)
 }
-@Composable
-fun EnterShopAddressRoute() {
-    EnterShopAddressRoute()
-}
 
 @Composable
 fun HomeScreen(
