@@ -10,10 +10,12 @@ import ir.wordpressdashboard.feature.introduction.introductionScreen
 import ir.wordpressdashboard.feature.introduction.navigateToIntroduction
 import ir.wordpressdashboard.feature.login.loginScreen
 import ir.wordpressdashboard.feature.login.navigateToLogin
+import ir.wordpressdashboard.feature.siteraddress.enterShopAddressNavigation
+import ir.wordpressdashboard.feature.siteraddress.navigateToEnterShopAddress
 import ir.wordpressdashboard.feature.splash.Splash
 import ir.wordpressdashboard.feature.splash.splashScreen
-import kotlin.reflect.KClass
 
+import kotlin.reflect.KClass
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
@@ -27,7 +29,8 @@ fun AppNavHost(
     ) {
         splashScreen (navigateToIntroduction = navController::navigateToIntroduction)
         introductionScreen (navigateToLogin = navController::navigateToLogin)
-        loginScreen(navigateToHome = navController::navigateToHome)
+        enterShopAddressNavigation (navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
+        loginScreen(navigateToHome = navController::navigateToHome, navigateToEnterShopAddressScreen = navController::navigateToEnterShopAddress)
         homeScreen()
     }
 }
