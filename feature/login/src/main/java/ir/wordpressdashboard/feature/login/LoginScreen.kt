@@ -1,6 +1,8 @@
 package ir.wordpressdashboard.feature.login
 
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 fun LoginRoute(navigateToHome: (userId: String) -> Unit
@@ -56,6 +59,36 @@ fun LoginRoute(navigateToHome: (userId: String) -> Unit
 }
 
 @Composable
+fun AparatVideoView(
+    videoUrl: String = "https://www.aparat.com/v/a00ml3n", // Replace with actual Aparat video URL
+    modifier: Modifier = Modifier
+) {
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.allowFileAccess = true
+                settings.allowContentAccess = true
+                webViewClient = WebViewClient()
+
+                // Aparat embed URL format
+                val embedUrl = when {
+                    videoUrl.contains("aparat.com/v/") -> {
+                        val videoId = videoUrl.substringAfterLast("/")
+                        "https://www.aparat.com/video/video/embed/videohash/$videoId/vt/frame"
+                    }
+                    else -> videoUrl
+                }
+
+                loadUrl(embedUrl)
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
 fun LoginScreen(
     onSecureKeyClick: ()-> Unit,
     onQRCodeClick: () -> Unit,
@@ -68,6 +101,22 @@ fun LoginScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // 1. Aparat Video Section
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(12.dp))
+        ) {
+            AparatVideoView(
+                videoUrl = "https://www.aparat.com/v/your_video_id", // Replace with actual video ID
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+            )
+        }
+
         //2. Logo/Image
         Spacer(modifier = Modifier.height(24.dp))
         Box(
@@ -121,25 +170,14 @@ fun LoginScreen(
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(12.dp))
-        // Fake help lines
 
         Column {
-            repeat(2) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .height(12.dp)
-                        .background(Color(0xFFE1BEE7), RoundedCornerShape(8.dp))
-                        .padding(vertical = 4.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            Text(
+                text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین"
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        // 6. Bottom Navigation
-//        BottomNavigationBar(selectIndex, onNavItemSelected)
     }
 }
 

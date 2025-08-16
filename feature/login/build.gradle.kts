@@ -11,5 +11,6 @@ android {
 dependencies {
 
     implementation (libs.google.accompanist.pager)
+    implementation("androidx.webkit:webkit:1.8.0")
 
 }
