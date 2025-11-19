@@ -34,22 +34,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.LocalInspectionMode
 
 @Composable
-fun LoginRoute(navigateToHome: (userId: String) -> Unit
-               ,navigateToEnterShopAddressScreen: () -> Unit) {
-//    LoginScreen {
-//        navigateToHome("123",)
-//    }
-
+fun LoginRoute(
+    navigateToConSecKeys: () -> Unit,
+    navigateToQRCode: () -> Unit
+) {
     var selectIndex by remember { mutableStateOf(1) }
 
     LoginScreen(
         onSecureKeyClick = {
-            navigateToHome("user123")
+            navigateToConSecKeys()
         },
         onQRCodeClick = {
-            navigateToEnterShopAddressScreen()
+            navigateToQRCode()
         },
         onNavItemSelected = { idx ->
             selectIndex = idx
@@ -63,29 +62,45 @@ fun AparatVideoView(
     videoUrl: String = "https://www.aparat.com/v/a00ml3n", // Replace with actual Aparat video URL
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.allowFileAccess = true
-                settings.allowContentAccess = true
-                webViewClient = WebViewClient()
+    val isInPreview = LocalInspectionMode.current
 
-                // Aparat embed URL format
-                val embedUrl = when {
-                    videoUrl.contains("aparat.com/v/") -> {
-                        val videoId = videoUrl.substringAfterLast("/")
-                        "https://www.aparat.com/video/video/embed/videohash/$videoId/vt/frame"
+    if (isInPreview) {
+        // Show a placeholder in preview mode
+        Box(
+            modifier = modifier.background(Color(0xFFE0E0E0)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Video Preview\n(WebView not available in preview)",
+                textAlign = TextAlign.Center,
+                color = Color.Gray
+            )
+        }
+    } else {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.allowFileAccess = true
+                    settings.allowContentAccess = true
+                    webViewClient = WebViewClient()
+
+                    // Aparat embed URL format
+                    val embedUrl = when {
+                        videoUrl.contains("aparat.com/v/") -> {
+                            val videoId = videoUrl.substringAfterLast("/")
+                            "https://www.aparat.com/video/video/embed/videohash/$videoId/vt/frame"
+                        }
+                        else -> videoUrl
                     }
-                    else -> videoUrl
-                }
 
-                loadUrl(embedUrl)
-            }
-        },
-        modifier = modifier
-    )
+                    loadUrl(embedUrl)
+                }
+            },
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
@@ -173,7 +188,8 @@ fun LoginScreen(
 
         Column {
             Text(
-                text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین"
+                text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین",
+                fontWeight = FontWeight.Bold
             )
         }
 

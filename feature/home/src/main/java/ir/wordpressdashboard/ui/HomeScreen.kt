@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ir.wordpressdashboard.model.Products
 
 @Composable
 fun HomeRoute(userId: String) {
@@ -23,7 +24,12 @@ fun HomeRoute(userId: String) {
 }
 @Composable
 fun EnterShopAddressRoute() {
-    EnterShopAddressRoute()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Enter Shop Address Screen")
+    }
 }
 
 @Composable
@@ -38,6 +44,17 @@ fun HomeScreen(
         viewModel.loadProducts()
     }
 
+    HomeScreenContent(
+        products = products,
+        isLoading = isLoading
+    )
+}
+
+@Composable
+fun HomeScreenContent(
+    products: List<Products>,
+    isLoading: Boolean
+) {
     if (isLoading) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -60,5 +77,36 @@ fun HomeScreen(
 @Composable
 @Preview(showBackground = true)
 fun HomeScreenPreview() {
-    HomeScreen("123")
+    HomeScreenContent(
+        products = listOf(
+            Products(
+                id = 1,
+                name = "Sample Product 1",
+                price = "$10.99",
+                description = "Description 1",
+                permalink = "",
+                images = emptyList(),
+                stock_status = "instock"
+            ),
+            Products(
+                id = 2,
+                name = "Sample Product 2",
+                price = "$20.99",
+                description = "Description 2",
+                permalink = "",
+                images = emptyList(),
+                stock_status = "instock"
+            )
+        ),
+        isLoading = false
+    )
+}
+
+@Composable
+@Preview(showBackground = true, name = "Loading State")
+fun HomeScreenLoadingPreview() {
+    HomeScreenContent(
+        products = emptyList(),
+        isLoading = true
+    )
 }

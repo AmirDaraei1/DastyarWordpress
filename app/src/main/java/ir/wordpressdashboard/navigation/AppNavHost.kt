@@ -8,8 +8,12 @@ import ir.wordpressdashboard.ui.homeScreen
 import ir.wordpressdashboard.ui.navigateToHome
 import ir.wordpressdashboard.feature.introduction.introductionScreen
 import ir.wordpressdashboard.feature.introduction.navigateToIntroduction
+import ir.wordpressdashboard.feature.keys.conSecKeysScreen
+import ir.wordpressdashboard.feature.keys.navigateToConSecKeys
 import ir.wordpressdashboard.feature.login.loginScreen
 import ir.wordpressdashboard.feature.login.navigateToLogin
+import ir.wordpressdashboard.feature.qrcode.navigateToQRCode
+import ir.wordpressdashboard.feature.qrcode.qrCodeScreen
 import ir.wordpressdashboard.feature.siteraddress.enterShopAddressNavigation
 import ir.wordpressdashboard.feature.siteraddress.navigateToEnterShopAddress
 import ir.wordpressdashboard.feature.splash.Splash
@@ -27,10 +31,15 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        splashScreen (navigateToIntroduction = navController::navigateToIntroduction)
-        introductionScreen (navigateToLogin = navController::navigateToLogin)
-        enterShopAddressNavigation (navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
-        loginScreen(navigateToHome = navController::navigateToHome, navigateToEnterShopAddressScreen = navController::navigateToEnterShopAddress)
+        splashScreen(navigateToIntroduction = navController::navigateToIntroduction)
+        introductionScreen(navigateToLogin = navController::navigateToLogin)
+        loginScreen(
+            navigateToConSecKeys = navController::navigateToConSecKeys,
+            navigateToQRCode = navController::navigateToQRCode
+        )
+        conSecKeysScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
+        qrCodeScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
+        enterShopAddressNavigation(navigateToEnterShopAddress = { navController.navigateToHome("") })
         homeScreen()
     }
 }

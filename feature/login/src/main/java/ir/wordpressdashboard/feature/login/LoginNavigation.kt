@@ -13,8 +13,8 @@ fun NavController.navigateToLogin(navOptions: NavOptions? = null) {
     navigate(Login, navOptions)
 }
 
-fun NavGraphBuilder.loginScreen(navigateToHome: (String) -> Unit, navigateToEnterShopAddressScreen: () -> Unit) {
+fun NavGraphBuilder.loginScreen(navigateToConSecKeys: () -> Unit, navigateToQRCode: () -> Unit) {
     composable<Login> {
-        LoginRoute(navigateToHome, navigateToEnterShopAddressScreen)
+        LoginRoute(navigateToConSecKeys, navigateToQRCode)
     }
 }
