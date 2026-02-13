@@ -1,5 +1,9 @@
 package ir.wordpressdashboard.feature.qrcode
 
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,9 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+
 @Composable
 fun QRCodeRoute(navigateToEnterShopAddress: () -> Unit) {
     QRCodeScreen(onNextClick = navigateToEnterShopAddress)
@@ -38,6 +48,20 @@ fun QRCodeRoute(navigateToEnterShopAddress: () -> Unit) {
 fun QRCodeScreen(onNextClick: () -> Unit) {
     var scannedCode by remember { mutableStateOf<String?>(null) }
     val stepActive = Color(0xFF6251A6)
+    val context = LocalContext.current
+
+    // Show Toast when QR code is scanned
+    LaunchedEffect(scannedCode) {
+        scannedCode?.let { code ->
+            Log.d("QRCodeScreen", "QR Code scanned: $code")
+            Toast.makeText(
+                context,
+                "QR Code اسکن شد:\n$code",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -152,13 +176,50 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
 
                 // Display scanned code or instruction
                 if (scannedCode != null) {
-                    Text(
-                        text = "کد اسکن شد: $scannedCode",
-                        color = stepActive,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "✅ QR Code اسکن شد!",
+                            color = Color(0xFF4CAF50),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // QR Code Content Card
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Color.White,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Text(
+                                text = "محتوای QR Code:",
+                                color = stepActive,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = scannedCode!!,
+                                color = Color(0xFF000000),
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 } else {
                     Text(
                         text = "دوربین را به سمت QR Code نگه دارید",

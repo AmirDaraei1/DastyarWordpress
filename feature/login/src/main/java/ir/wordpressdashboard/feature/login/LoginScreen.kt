@@ -11,14 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -113,85 +108,97 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Aparat Video Section
-        Spacer(modifier = Modifier.height(16.dp))
+        // Top Bar with title
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
-                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(12.dp))
-        ) {
-            AparatVideoView(
-                videoUrl = "https://www.aparat.com/v/your_video_id", // Replace with actual video ID
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
-            )
-        }
-
-        //2. Logo/Image
-        Spacer(modifier = Modifier.height(24.dp))
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .background(Color(0xFFEDE7F6), shape = RoundedCornerShape(16.dp)),
+                .background(Color(0xFF6B52E3))
+                .padding(vertical = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Default.Build, contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = Color(0xFFB39DDB)
-            )
-        }
-        //3. Main Title/Text
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "برای مشاهده فروشگاه ابتدا سایت خود را متصل کنید",
-            fontWeight = FontWeight.Medium,
-            fontSize = 16.sp,
-            color = Color(0xFF616161),
-            textAlign = TextAlign.Center
-        )
-        //4. Buttons
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onSecureKeyClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF512DA8)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            Text("اتصال با کلید امنیتی", color = Color.White)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onQRCodeClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF512DA8)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            Text("اتصال با QR Code", color = Color.White)
-        }
-        //5. Info/Help Section
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = "راهنما",
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFB39DDB),
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Column {
             Text(
-                text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین",
+                text = "اتصال به سایت",
+                color = Color.White,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         }
+
+        // 1. Aparat Video Section
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .background(Color.Black)
+        ) {
+            AparatVideoView(
+                videoUrl = "https://www.aparat.com/v/your_video_id", // Replace with actual video ID
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        //2. Buttons
+        Button(
+            onClick = onSecureKeyClick,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B52E3)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .height(56.dp)
+        ) {
+            Text(
+                text = "اتصال با کلیدهای امنیتی",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = onQRCodeClick,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B52E3)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .height(56.dp)
+        ) {
+            Text(
+                text = "اتصال با QRCODE",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        //3. Help Section
+        Text(
+            text = "راهنما",
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF4A4A4A),
+            fontSize = 18.sp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین.",
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            color = Color(0xFF333333),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
 
         Spacer(modifier = Modifier.weight(1f))
     }

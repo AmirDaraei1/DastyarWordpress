@@ -12,10 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -49,138 +49,110 @@ fun EnterShopAddressScreen(
     onSiteAddressEntered: (String) -> Unit,
     onNextClick: () -> Unit
 ) {
-    val stepInactive = Color(0xFFD9BFFF)
-    val stepActive = Color(0xFF6251A6)
-    val stepBackground = Color(0xFFF3EAFF)
+    val primaryPurple = Color(0xFF5850A6)
+    val lightGray = Color(0xFFE0E0E0)
+    val backgroundColor = Color(0xFFFAFAFA)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F4F5))
+            .background(backgroundColor)
     ) {
-        //Top App Bar
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(stepBackground)
-                .height(56.dp),
+        // Top App Bar with Title
+//        Box(
+//            Modifier
+//                .fillMaxWidth()
+//                .background(primaryPurple)
+//                .height(16.dp),
 //            contentAlignment = Alignment.Center
-        ) {
-            //progress Bar (center)
-            Box(
-                Modifier
-                    .align(Alignment.Center)
-            ) {
-                Box(
-                    Modifier
-                        .width(80.dp)
-                        .height(6.dp)
-                        .background(
-                            color = stepActive,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                )
-            }
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "بعدی",
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 16.dp)
-                    .size(28.dp),
+//        ) {
+//            Text(
+//                text = "دستیار وردپرس",
+//                color = Color.White,
+//                style = MaterialTheme.typography.headlineMedium
+//            )
+//        }
 
-                tint = stepInactive,
-            )
-        }
-        Spacer(Modifier.height(24.dp))
-        //Step Dots
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepActive, CircleShape)
-            )
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepInactive, CircleShape)
-            )
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepInactive, CircleShape)
-            )
-
-        }
-        Spacer(Modifier.height(32.dp))
-
-        //Input Field for Address
-        Text(
-            text = "آدرس فروشگاهتان را وارد کنید",
-            color = stepActive,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(Modifier.height(24.dp))
-
-        //Input Box
-
-        Box(
-            Modifier
-                .padding(horizontal = 32.dp)
+        // Content Area
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
-                .background(stepBackground, RoundedCornerShape(20.dp)),
-            contentAlignment = Alignment.Center
+                .weight(1f)
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Input Field Label
+            Text(
+                text = "آدرس سایت",
+                color = Color.Black,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                textAlign = TextAlign.Right
+            )
+
+            // Input Box
+            TextField(
+                value = address,
+                onValueChange = onSiteAddressEntered,
+                placeholder = {
+                    Text(
+                        "https://www.example.com",
+                        color = Color.Gray
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = lightGray,
+                    unfocusedContainerColor = lightGray,
+                    disabledContainerColor = lightGray,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp)
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Helper Text
+//            Text(
+//                text = "آدرس سایت با این فرمت وارد شود",
+//                color = Color.Gray,
+//                style = MaterialTheme.typography.bodySmall,
+//                modifier = Modifier.fillMaxWidth()
+//            )
+        }
+
+        // Enter Button
+        Button(
+            onClick = onNextClick,
+            colors = ButtonDefaults.buttonColors(containerColor = primaryPurple),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .height(56.dp)
         ) {
             Row(
-                Modifier.fillMaxSize(),
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = address,
-                    onValueChange = onSiteAddressEntered,
-                    placeholder = { Text("آدرس سایتان را وارد کنید.") },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
-                    ),
-//                    modifier = Modifier.weight(1f)
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "ورود",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
-                Spacer(Modifier.width(16.dp))
-//                Box(
-//                    Modifier
-//                        .size(32.dp)
-//                        .background(stepInactive, CircleShape),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    //put Icon In here
-//                }
-                Spacer(Modifier.weight(1f))
-            }
-
-        }
-        // Next Button
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp, end = 24.dp),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            Button(
-                onClick = onNextClick,
-                colors = ButtonDefaults.buttonColors(containerColor = stepActive),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .width(130.dp)
-                    .height(48.dp)
-            ) {
-                Text(text = "بعدی", color = Color.White)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "ورود",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }

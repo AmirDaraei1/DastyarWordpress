@@ -2,7 +2,9 @@ plugins {
     alias(libs.plugins.dastyarwordpress.android.feature)
     alias(libs.plugins.dastyarwordpress.android.library.compose)
     alias(libs.plugins.dastyarwordpress.android.hilt)
-    alias(libs.plugins.dastyarwordpress.network.dependencies)}
+    alias(libs.plugins.dastyarwordpress.network.dependencies)
+    alias(libs.plugins.kotlin.serialization)
+}
 
 android {
     namespace = "ir.wordpressdashboard.feature.home"
