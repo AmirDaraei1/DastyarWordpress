@@ -32,9 +32,12 @@ android {
 dependencies {
     implementation(projects.feature.login)
     implementation(projects.feature.home)
+    implementation(projects.core.network)
+    implementation(projects.core.domain)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -14,14 +14,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ir.wordpressdashboard.feature.login.R
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashRoute(navigateToLogin: () -> Unit) {
+fun SplashRoute(
+    navigateToIntroduction: () -> Unit,
+    navigateToHome: () -> Unit
+) {
+    val viewModel: SplashViewModel = hiltViewModel()
     SplashScreen {
-        navigateToLogin()
+        if (viewModel.isAlreadyConfigured()) {
+            navigateToHome()
+        } else {
+            navigateToIntroduction()
+        }
     }
 }
 
@@ -48,14 +56,6 @@ fun SplashScreen(navigateToLogin: () -> Unit) {
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             contentScale = ContentScale.FillWidth
-        )
-        Image(
-            painter = painterResource(id = R.drawable.logo_wordpress),
-            contentDescription = "Centered Logo",
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(1000.dp),
-            contentScale = ContentScale.Fit
         )
     }
 }

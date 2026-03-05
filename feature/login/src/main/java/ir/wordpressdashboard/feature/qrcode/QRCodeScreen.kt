@@ -1,6 +1,5 @@
 package ir.wordpressdashboard.feature.qrcode
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -23,10 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,28 +34,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun QRCodeRoute(navigateToEnterShopAddress: () -> Unit) {
-    QRCodeScreen(onNextClick = navigateToEnterShopAddress)
+    QRCodeScreen(
+        viewModel = hiltViewModel(),
+        onNextClick = navigateToEnterShopAddress
+    )
 }
 
 @Composable
-fun QRCodeScreen(onNextClick: () -> Unit) {
-    var scannedCode by remember { mutableStateOf<String?>(null) }
+fun QRCodeScreen(
+    viewModel: QRCodeViewModel,
+    onNextClick: () -> Unit
+) {
+    val scanState by viewModel.scanState.collectAsState()
     val stepActive = Color(0xFF6251A6)
     val context = LocalContext.current
 
-    // Show Toast when QR code is scanned
-    LaunchedEffect(scannedCode) {
-        scannedCode?.let { code ->
-            Log.d("QRCodeScreen", "QR Code scanned: $code")
-            Toast.makeText(
-                context,
-                "QR Code اسکن شد:\n$code",
-                Toast.LENGTH_LONG
-            ).show()
+    // Auto-navigate after successful scan
+    LaunchedEffect(scanState) {
+        when (val state = scanState) {
+            is QRScanState.Success -> {
+                Toast.makeText(context, "✅ اطلاعات سایت ذخیره شد", Toast.LENGTH_SHORT).show()
+                onNextClick()
+            }
+            is QRScanState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> Unit
         }
     }
 
@@ -67,61 +73,7 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
             .fillMaxSize()
             .background(Color(0xFFF5F4F5))
     ) {
-        // Top App Bar
-//        Box(
-//            Modifier
-//                .fillMaxWidth()
-//                .background(stepBackground)
-//                .height(56.dp),
-//        ) {
-//            // Progress Bar (center)
-//            Box(
-//                Modifier.align(Alignment.Center)
-//            ) {
-//                Box(
-//                    Modifier
-//                        .width(80.dp)
-//                        .height(6.dp)
-//                        .background(
-//                            color = stepActive,
-//                            shape = RoundedCornerShape(8.dp)
-//                        )
-//                )
-//            }
-//            Icon(
-//                imageVector = Icons.Default.ArrowForward,
-//                contentDescription = "بعدی",
-//                modifier = Modifier
-//                    .align(Alignment.CenterEnd)
-//                    .padding(end = 16.dp)
-//                    .size(28.dp),
-//                tint = stepInactive,
-//            )
-//        }
-
         Spacer(Modifier.height(24.dp))
-
-//        // Step Dots
-//        Row(
-//            Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceEvenly
-//        ) {
-//            Box(
-//                Modifier
-//                    .size(28.dp)
-//                    .background(stepActive, CircleShape)
-//            )
-//            Box(
-//                Modifier
-//                    .size(28.dp)
-//                    .background(stepActive, CircleShape)
-//            )
-//            Box(
-//                Modifier
-//                    .size(28.dp)
-//                    .background(stepInactive, CircleShape)
-//            )
-//        }
 
         Spacer(Modifier.height(32.dp))
 
@@ -157,9 +109,7 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
                     QRCodeScanner(
                         modifier = Modifier.fillMaxSize(),
                         onQRCodeScanned = { code ->
-                            if (scannedCode == null) {
-                                scannedCode = code
-                            }
+                            viewModel.onQRCodeScanned(code)
                         }
                     )
 
@@ -174,65 +124,89 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
 
                 Spacer(Modifier.height(16.dp))
 
-                // Display scanned code or instruction
-                if (scannedCode != null) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "✅ QR Code اسکن شد!",
-                            color = Color(0xFF4CAF50),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        // QR Code Content Card
+                when (val state = scanState) {
+                    is QRScanState.Success -> {
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    Color.White,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.Start
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "محتوای QR Code:",
-                                color = stepActive,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                text = if (state.credentials.baseUrl.isEmpty())
+                                    "✅ کلیدها ذخیره شدند!\nاکنون آدرس سایت را وارد کنید"
+                                else
+                                    "✅ اطلاعات سایت ذخیره شد!",
+                                color = Color(0xFF4CAF50),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
                             )
+
                             Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = scannedCode!!,
-                                color = Color(0xFF000000),
-                                fontSize = 13.sp,
-                                lineHeight = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            )
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(8.dp))
+                                    .padding(16.dp)
+                                    .verticalScroll(rememberScrollState()),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                if (state.credentials.baseUrl.isNotEmpty()) {
+                                    Text(
+                                        text = "آدرس سایت:",
+                                        color = stepActive,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = state.credentials.baseUrl,
+                                        color = Color(0xFF333333),
+                                        fontSize = 12.sp
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                }
+                                Text(
+                                    text = "Consumer Key:",
+                                    color = stepActive,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = state.credentials.consumerKey.take(12) + "••••••••",
+                                    color = Color(0xFF333333),
+                                    fontSize = 12.sp
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = "Secret Key:",
+                                    color = stepActive,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = state.credentials.secretKey.take(12) + "••••••••",
+                                    color = Color(0xFF333333),
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
-                } else {
-                    Text(
-                        text = "دوربین را به سمت QR Code نگه دارید",
-                        color = stepActive,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+
+                    else -> {
+                        Text(
+                            text = "دوربین را به سمت QR Code نگه دارید",
+                            color = stepActive,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }
 
         Spacer(Modifier.weight(1f))
 
-        // Next Button (Skip for now)
         Box(
             Modifier
                 .fillMaxWidth()
@@ -247,7 +221,10 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
                     .width(130.dp)
                     .height(48.dp)
             ) {
-                Text(text = "رد کردن", color = Color.White)
+                Text(
+                    text = if (scanState is QRScanState.Success) "بعدی" else "رد کردن",
+                    color = Color.White
+                )
             }
         }
     }
@@ -256,6 +233,5 @@ fun QRCodeScreen(onNextClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewQRCodeScreen() {
-    QRCodeScreen(onNextClick = {})
+    // Preview without ViewModel
 }
-

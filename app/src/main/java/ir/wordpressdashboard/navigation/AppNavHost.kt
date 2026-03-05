@@ -2,6 +2,7 @@ package ir.wordpressdashboard.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import ir.wordpressdashboard.ui.homeScreen
@@ -18,20 +19,25 @@ import ir.wordpressdashboard.feature.siteraddress.enterShopAddressNavigation
 import ir.wordpressdashboard.feature.siteraddress.navigateToEnterShopAddress
 import ir.wordpressdashboard.feature.splash.Splash
 import ir.wordpressdashboard.feature.splash.splashScreen
-
 import kotlin.reflect.KClass
+
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     startDestination: KClass<*> = Splash::class
 ) {
     val navController = rememberNavController()
+    val viewModel: AppNavViewModel = hiltViewModel()
+
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination
     ) {
-        splashScreen(navigateToIntroduction = navController::navigateToIntroduction)
+        splashScreen(
+            navigateToIntroduction = navController::navigateToIntroduction,
+            navigateToHome = { navController.navigateToHome() }
+        )
         introductionScreen(navigateToLogin = navController::navigateToLogin)
         loginScreen(
             navigateToConSecKeys = navController::navigateToConSecKeys,
@@ -39,7 +45,10 @@ fun AppNavHost(
         )
         conSecKeysScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
         qrCodeScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
-        enterShopAddressNavigation(navigateToEnterShopAddress = { navController.navigateToHome("") })
+        enterShopAddressNavigation(navigateToHome = { address ->
+            viewModel.saveSiteAddress(address)
+            navController.navigateToHome()
+        })
         homeScreen()
     }
 }

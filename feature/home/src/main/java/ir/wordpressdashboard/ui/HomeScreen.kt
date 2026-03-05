@@ -19,9 +19,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ir.wordpressdashboard.model.Products
 
 @Composable
-fun HomeRoute(userId: String) {
-    HomeScreen(userId = userId)
+fun HomeRoute() {
+    HomeScreen()
 }
+
 @Composable
 fun EnterShopAddressRoute() {
     Box(
@@ -33,10 +34,7 @@ fun EnterShopAddressRoute() {
 }
 
 @Composable
-fun HomeScreen(
-    userId: String,
-               viewModel: HomeViewModel = hiltViewModel()
-               ) {
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val products = viewModel.products
     val isLoading = viewModel.isLoading
 

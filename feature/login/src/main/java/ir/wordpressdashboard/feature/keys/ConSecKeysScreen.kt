@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -38,12 +37,15 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ConSecKeysRoute(navigateToEnterShopAddress: () -> Unit) {
+    var siteAddress by remember { mutableStateOf("") }
     var consumerKey by remember { mutableStateOf("") }
     var secretKey by remember { mutableStateOf("") }
 
     ConSecKeysScreen(
+        siteAddress = siteAddress,
         consumerKey = consumerKey,
         secretKey = secretKey,
+        onSiteAddressChanged = { siteAddress = it },
         onConsumerKeyChanged = { consumerKey = it },
         onSecretKeyChanged = { secretKey = it },
         onNextClick = navigateToEnterShopAddress
@@ -53,177 +55,224 @@ fun ConSecKeysRoute(navigateToEnterShopAddress: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConSecKeysScreen(
+    siteAddress: String = "",
     consumerKey: String = "",
     secretKey: String = "",
+    onSiteAddressChanged: (String) -> Unit,
     onConsumerKeyChanged: (String) -> Unit,
     onSecretKeyChanged: (String) -> Unit,
     onNextClick: () -> Unit
 ) {
-    val stepInactive = Color(0xFFD9BFFF)
     val stepActive = Color(0xFF6251A6)
-    val stepBackground = Color(0xFFF3EAFF)
+    val inputBackground = Color(0xFFE8E8E8)
+    val textColor = Color(0xFF666666)
 
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F4F5))
+            .background(Color.White)
     ) {
         // Top App Bar
         Box(
             Modifier
                 .fillMaxWidth()
-                .background(stepBackground)
-                .height(56.dp),
+                .background(stepActive)
+                .height(60.dp),
+            contentAlignment = Alignment.Center
         ) {
-            // Progress Bar (center)
+            Text(
+                text = "اعتبار سنجی سایت",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+
+        Spacer(Modifier.height(40.dp))
+
+        // Site Address Input Box
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth()
+        ) {
             Box(
-                Modifier.align(Alignment.Center)
+                Modifier
+                    .fillMaxWidth()
+                    .background(inputBackground, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                Box(
-                    Modifier
-                        .width(80.dp)
-                        .height(6.dp)
-                        .background(
-                            color = stepActive,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                )
+                Column {
+                    Text(
+                        text = "آدرس سایت",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = siteAddress,
+                        onValueChange = onSiteAddressChanged,
+                        placeholder = {
+                            Text(
+                                text = "آدرس سایت یا این فرمت وارد شود",
+                                color = textColor,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
             }
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "بعدی",
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 16.dp)
-                    .size(28.dp),
-                tint = stepInactive,
+            Text(
+                text = "https://www.example.com",
+                color = textColor,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
-
-        Spacer(Modifier.height(24.dp))
-
-        // Step Dots
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepActive, CircleShape)
-            )
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepActive, CircleShape)
-            )
-            Box(
-                Modifier
-                    .size(28.dp)
-                    .background(stepInactive, CircleShape)
-            )
-        }
-
-        Spacer(Modifier.height(32.dp))
-
-        // Title
-        Text(
-            text = "کلیدهای امنیتی را وارد کنید",
-            color = stepActive,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
 
         Spacer(Modifier.height(24.dp))
 
         // Consumer Key Input Box
-        Text(
-            text = "Consumer Key",
-            color = stepActive,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Box(
-            Modifier
+        Column(
+            modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .fillMaxWidth()
-                .height(80.dp)
-                .background(stepBackground, RoundedCornerShape(20.dp)),
-            contentAlignment = Alignment.Center
         ) {
-            TextField(
-                value = consumerKey,
-                onValueChange = onConsumerKeyChanged,
-                placeholder = { Text("کلید مصرف کننده را وارد کنید") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(inputBackground, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "کلید مصرف کننده",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = consumerKey,
+                        onValueChange = onConsumerKeyChanged,
+                        placeholder = { Text("") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            }
+            Text(
+                text = "مثال:\nck_ef1b5aa967cgfb90e453be4671e80884dfbe4e16",
+                color = textColor,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         // Secret Key Input Box
-        Text(
-            text = "Secret Key",
-            color = stepActive,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Box(
-            Modifier
+        Column(
+            modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .fillMaxWidth()
-                .height(80.dp)
-                .background(stepBackground, RoundedCornerShape(20.dp)),
-            contentAlignment = Alignment.Center
         ) {
-            TextField(
-                value = secretKey,
-                onValueChange = onSecretKeyChanged,
-                placeholder = { Text("کلید محرمانه را وارد کنید") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(inputBackground, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "رمز مصرف کننده",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = secretKey,
+                        onValueChange = onSecretKeyChanged,
+                        placeholder = { Text("") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                }
+            }
+            Text(
+                text = "مثال:\ncs_7c584ec7704c60b47f9017c817d3db3fd81c1182",
+                color = textColor,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
 
         Spacer(Modifier.weight(1f))
 
-        // Next Button
-        Box(
-            Modifier
+        // Login Button
+        Button(
+            onClick = onNextClick,
+            colors = ButtonDefaults.buttonColors(containerColor = stepActive),
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp, end = 24.dp),
-            contentAlignment = Alignment.BottomEnd
+                .padding(horizontal = 32.dp)
+                .height(56.dp),
+            enabled = siteAddress.isNotBlank() && consumerKey.isNotBlank() && secretKey.isNotBlank()
         ) {
-            Button(
-                onClick = onNextClick,
-                colors = ButtonDefaults.buttonColors(containerColor = stepActive),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .width(130.dp)
-                    .height(48.dp),
-                enabled = consumerKey.isNotBlank() && secretKey.isNotBlank()
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "بعدی", color = Color.White)
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "ورود",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(text = "ورود", color = Color.White, style = MaterialTheme.typography.titleMedium)
             }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        // Bottom Links
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                text = "ویدیویی آموزش تنظیمات",
+                color = stepActive,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "دانلود پلاگین",
+                color = stepActive,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
@@ -232,8 +281,10 @@ fun ConSecKeysScreen(
 @Composable
 fun PreviewConSecKeysScreen() {
     ConSecKeysScreen(
+        siteAddress = "",
         consumerKey = "",
         secretKey = "",
+        onSiteAddressChanged = {},
         onConsumerKeyChanged = {},
         onSecretKeyChanged = {},
         onNextClick = {}

@@ -10,6 +10,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation (libs.google.accompanist.pager)
     implementation (libs.google.accompanist.permissions)
     implementation("androidx.webkit:webkit:1.8.0")
