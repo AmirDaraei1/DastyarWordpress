@@ -6,6 +6,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ir.wordpressdashboard.api.MediaApi
+import ir.wordpressdashboard.api.PostApi
 import ir.wordpressdashboard.api.ProductApi
 import ir.wordpressdashboard.provider.CredentialsManager
 import ir.wordpressdashboard.repository.CredentialsRepository
@@ -16,7 +18,12 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class WpRetrofit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -71,5 +78,37 @@ abstract class NetworkModule {
         @Singleton
         fun provideProductApi(retrofit: Retrofit): ProductApi =
             retrofit.create(ProductApi::class.java)
+
+        @Provides
+        @Singleton
+        @WpRetrofit
+        fun provideWpRetrofit(
+            okHttpClient: OkHttpClient,
+            credentialsManager: CredentialsManager
+        ): Retrofit {
+            // Strip wc/v3/ suffix to get the wp-json root, e.g. https://site.com/wp-json/
+            val wcBase = credentialsManager.baseUrl
+            val wpBase = if (wcBase.contains("wc/v3")) {
+                wcBase.substringBefore("wc/v3")
+            } else {
+                wcBase
+            }
+            val contentType = "application/json".toMediaType()
+            return Retrofit.Builder()
+                .baseUrl(wpBase)
+                .client(okHttpClient)
+                .addConverterFactory(Json { ignoreUnknownKeys = true }.asConverterFactory(contentType))
+                .build()
+        }
+
+        @Provides
+        @Singleton
+        fun providePostApi(@WpRetrofit retrofit: Retrofit): PostApi =
+            retrofit.create(PostApi::class.java)
+
+        @Provides
+        @Singleton
+        fun provideMediaApi(@WpRetrofit retrofit: Retrofit): MediaApi =
+            retrofit.create(MediaApi::class.java)
     }
 }

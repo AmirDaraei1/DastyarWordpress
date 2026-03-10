@@ -12,5 +12,8 @@ android {
 dependencies {
     implementation(project(":core:network"))
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+//    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.coil.compose)
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }
 
