@@ -7,5 +7,6 @@ import javax.inject.Inject
 class GetPostsUseCase @Inject constructor(
     private val repository: PostRepository
 ) {
-    suspend operator fun invoke(): List<Post> = repository.getPosts()
+    suspend operator fun invoke(page: Int = 1, perPage: Int = 10): List<Post> =
+        repository.getPosts(page = page, perPage = perPage)
 }

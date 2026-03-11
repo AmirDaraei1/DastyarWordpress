@@ -7,5 +7,6 @@ import javax.inject.Inject
 class MediaRemoteDataSource @Inject constructor(
     private val api: MediaApi
 ) {
-    suspend fun getMedia(): List<MediaDto> = api.getMedia()
+    suspend fun getMedia(page: Int = 1, perPage: Int = 20): List<MediaDto> =
+        api.getMedia(page = page, perPage = perPage)
 }

@@ -7,5 +7,6 @@ import javax.inject.Inject
 class GetMediaUseCase @Inject constructor(
     private val repository: MediaRepository
 ) {
-    suspend operator fun invoke(): List<Media> = repository.getMedia()
+    suspend operator fun invoke(page: Int = 1, perPage: Int = 20): List<Media> =
+        repository.getMedia(page = page, perPage = perPage)
 }

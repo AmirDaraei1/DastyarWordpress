@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.dastyarwordpress.android.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -43,4 +44,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":core:network"))
     implementation(project(":core:domain"))
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

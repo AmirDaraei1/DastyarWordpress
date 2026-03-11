@@ -6,5 +6,6 @@ import javax.inject.Inject
 class GetProductUseCase @Inject constructor(
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(): List<Products> = repository.getProducts()
+    suspend operator fun invoke(page: Int = 1, perPage: Int = 10): List<Products> =
+        repository.getProducts(page = page, perPage = perPage)
 }

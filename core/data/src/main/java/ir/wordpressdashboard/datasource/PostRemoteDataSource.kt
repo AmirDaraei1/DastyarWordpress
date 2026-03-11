@@ -7,5 +7,6 @@ import javax.inject.Inject
 class PostRemoteDataSource @Inject constructor(
     private val api: PostApi
 ) {
-    suspend fun getPosts(): List<PostDto> = api.getPosts()
+    suspend fun getPosts(page: Int = 1, perPage: Int = 10): List<PostDto> =
+        api.getPosts(page = page, perPage = perPage)
 }
