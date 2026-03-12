@@ -11,6 +11,7 @@ import ir.wordpressdashboard.common.NetworkMonitor
 import ir.wordpressdashboard.model.Media
 import ir.wordpressdashboard.model.Post
 import ir.wordpressdashboard.model.Products
+import ir.wordpressdashboard.usecase.CreateProductUseCase
 import ir.wordpressdashboard.usecase.GetMediaUseCase
 import ir.wordpressdashboard.usecase.GetPostsUseCase
 import ir.wordpressdashboard.usecase.GetProductUseCase
@@ -23,7 +24,8 @@ class ProductViewModel @Inject constructor(
     private val getProducts: GetProductUseCase,
     private val getPosts: GetPostsUseCase,
     private val getMedia: GetMediaUseCase,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val createProductUseCase: CreateProductUseCase
 ) : ViewModel() {
 
     companion object {
@@ -235,5 +237,60 @@ class ProductViewModel @Inject constructor(
                 Log.e("ProductVM", "loadNextMedia error: ${e.message}")
             } finally { isLoadingMoreMedia = false }
         }
+    }
+
+    // ── Create Product ────────────────────────────────────────────────────
+    var isCreating by mutableStateOf(false)
+        private set
+    var createSuccess by mutableStateOf(false)
+        private set
+    var createError by mutableStateOf<String?>(null)
+        private set
+
+    fun createProduct(
+        context: android.content.Context,
+        name: String,
+        description: String,
+        price: String,
+        stockStatus: String,
+        imageUris: List<android.net.Uri> = emptyList(),
+        wpImageUrls: List<String> = emptyList()
+    ) {
+        if (isCreating) return
+        viewModelScope.launch {
+            isCreating = true
+            createSuccess = false
+            createError = null
+            try {
+                Log.d("ProductVM", "Creating product: ${imageUris.size} local images, ${wpImageUrls.size} WP images")
+                createProductUseCase(
+                    context = context,
+                    name = name,
+                    description = description,
+                    price = price,
+                    stockStatus = stockStatus,
+                    imageUris = imageUris,
+                    wpImageUrls = wpImageUrls
+                )
+                createSuccess = true
+                refreshProducts()
+                Log.d("ProductVM", "Product created successfully")
+            } catch (e: Exception) {
+                val msg = e.message ?: "خطای ناشناخته"
+                createError = when {
+                    msg.contains("upload", ignoreCase = true) ||
+                    msg.contains("آپلود") -> "خطا در آپلود تصویر: $msg"
+                    else -> "خطا در ایجاد محصول: $msg"
+                }
+                Log.e("ProductVM", "createProduct error: $msg", e)
+            } finally {
+                isCreating = false
+            }
+        }
+    }
+
+    fun resetCreateState() {
+        createSuccess = false
+        createError = null
     }
 }

@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ir.wordpressdashboard.datasource.MediaLocalDataSource
 import ir.wordpressdashboard.datasource.MediaRemoteDataSource
+import ir.wordpressdashboard.datasource.MediaUploadDataSource
 import ir.wordpressdashboard.datasource.PostLocalDataSource
 import ir.wordpressdashboard.datasource.PostRemoteDataSource
 import ir.wordpressdashboard.datasource.ProductLocalDataSource
@@ -19,6 +20,8 @@ import ir.wordpressdashboard.local.dao.ProductDao
 import ir.wordpressdashboard.local.db.AppDatabase
 import ir.wordpressdashboard.repository.MediaRepository
 import ir.wordpressdashboard.repository.MediaRepositoryImpl
+import ir.wordpressdashboard.repository.MediaUploadRepository
+import ir.wordpressdashboard.repository.MediaUploadRepositoryImpl
 import ir.wordpressdashboard.repository.PostRepository
 import ir.wordpressdashboard.repository.PostRepositoryImpl
 import ir.wordpressdashboard.repository.ProductRepository
@@ -65,4 +68,9 @@ object DataModule {
         remoteDataSource: MediaRemoteDataSource,
         localDataSource: MediaLocalDataSource
     ): MediaRepository = MediaRepositoryImpl(remoteDataSource, localDataSource)
+
+    @Provides
+    fun provideMediaUploadRepository(
+        mediaUploadDataSource: MediaUploadDataSource
+    ): MediaUploadRepository = MediaUploadRepositoryImpl(mediaUploadDataSource)
 }

@@ -17,6 +17,7 @@ import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import retrofit2.Retrofit
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -57,6 +58,9 @@ abstract class NetworkModule {
             return OkHttpClient.Builder()
                 .addInterceptor(authInterceptor)
                 .addInterceptor(logging)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(120, TimeUnit.SECONDS)
                 .build()
         }
 
@@ -110,5 +114,10 @@ abstract class NetworkModule {
         @Singleton
         fun provideMediaApi(@WpRetrofit retrofit: Retrofit): MediaApi =
             retrofit.create(MediaApi::class.java)
+
+        @Provides
+        @Singleton
+        fun provideMediaUploadDataSource(mediaApi: MediaApi): ir.wordpressdashboard.datasource.MediaUploadDataSource =
+            ir.wordpressdashboard.datasource.MediaUploadDataSource(mediaApi)
     }
 }

@@ -49,4 +49,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // OkHttp for multipart upload
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 }
