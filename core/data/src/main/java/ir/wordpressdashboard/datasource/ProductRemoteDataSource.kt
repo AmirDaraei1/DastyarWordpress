@@ -13,5 +13,12 @@ class ProductRemoteDataSource @Inject constructor(
 
     suspend fun createProduct(request: CreateProductRequest): ProductsDto =
         api.createProduct(request)
+
+    suspend fun updateProduct(id: Int, request: CreateProductRequest): ProductsDto =
+        api.updateProduct(id, request)
+
+    suspend fun deleteProduct(id: Int) {
+        api.deleteProduct(id = id, force = true)
+    }
 }
 

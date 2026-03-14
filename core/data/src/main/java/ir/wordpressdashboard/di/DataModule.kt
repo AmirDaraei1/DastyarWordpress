@@ -70,6 +70,7 @@ object DataModule {
     ): MediaRepository = MediaRepositoryImpl(remoteDataSource, localDataSource)
 
     @Provides
+    @Singleton
     fun provideMediaUploadRepository(
         mediaUploadDataSource: MediaUploadDataSource
     ): MediaUploadRepository = MediaUploadRepositoryImpl(mediaUploadDataSource)

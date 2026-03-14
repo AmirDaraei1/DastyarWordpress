@@ -4,65 +4,98 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import ir.wordpressdashboard.api.MediaApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
+import ir.wordpressdashboard.provider.CredentialsManager
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
 class MediaUploadDataSource @Inject constructor(
-    private val api: MediaApi
+    private val api: MediaApi,
+    private val credentialsManager: CredentialsManager
 ) {
     companion object {
-        private const val MAX_IMAGE_SIZE = 1024  // حداکثر ۱۰۲۴ پیکسل
-        private const val COMPRESS_QUALITY = 80  // کیفیت ۸۰٪
-        private const val MAX_FILE_SIZE_BYTES = 500 * 1024  // ۵۰۰KB حداکثر
+        private const val MAX_IMAGE_SIZE = 1024
+        private const val COMPRESS_QUALITY = 80
+        private const val MAX_FILE_SIZE_BYTES = 500 * 1024
     }
 
-    /**
-     * ① آپلود تصویر به: /wp-json/api/upload_media
-     *    سرور body خالی برمی‌گرداند اما ID را در header x-wp-upload-attachment-id می‌دهد
-     * ② با آن ID، source_url را از wp/v2/media/{id} می‌گیریم
-     */
-    suspend fun uploadMedia(context: Context, uri: Uri): String {
-        val fileName = "product_image_${System.currentTimeMillis()}.webp"
-        val tempFile = File(context.cacheDir, fileName)
+    // جلوگیری از آپلود همزمان یک URI
+    private val inFlightMutex = Mutex()
+    private val inFlightUris = mutableSetOf<String>()
 
-        // compress و resize عکس به فرمت WebP قبل از آپلود
-        val compressed = compressImage(context, uri, tempFile)
-        Log.d("MediaUpload", "Original size: ${getFileSize(context, uri)} bytes")
-        Log.d("MediaUpload", "Compressed (WebP) size: ${compressed.length()} bytes")
+    /** برمی‌گردونه Pair<mediaId, sourceUrl> */
+    suspend fun uploadMedia(context: Context, uri: Uri): Pair<Int, String> {
+        val uriKey = uri.toString()
 
-        val requestBody = compressed.asRequestBody("image/webp".toMediaTypeOrNull())
-        val filePart = MultipartBody.Part.createFormData("file", fileName, requestBody)
-
-        // ① آپلود
-        val response = api.uploadMediaCustom(file = filePart)
-        Log.d("MediaUpload", "Upload response code: ${response.code()}")
-        Log.d("MediaUpload", "Upload headers: ${response.headers()}")
-
-        if (!response.isSuccessful) {
-            throw Exception("آپلود تصویر ناموفق: ${response.code()}")
+        inFlightMutex.withLock {
+            if (uriKey in inFlightUris) {
+                Log.w("MediaUpload", "Duplicate upload attempt blocked for: $uriKey")
+                throw Exception("این تصویر در حال آپلود است — لطفاً صبر کنید")
+            }
+            inFlightUris.add(uriKey)
         }
 
-        // ② خواندن attachment ID از header
-        val attachmentId = response.headers()["x-wp-upload-attachment-id"]
-            ?.trim()
-            ?.toIntOrNull()
+        try {
+            // UUID تضمین می‌کنه هیچ‌وقت نام تکراری با فایل قبلی روی سرور نشه
+            val uniqueId = java.util.UUID.randomUUID().toString().replace("-", "").take(16)
+            val fileName  = "img_${uniqueId}.webp"
+            val tempFile  = File(context.cacheDir, fileName)
+            if (tempFile.exists()) tempFile.delete()
 
-        Log.d("MediaUpload", "Attachment ID from header: $attachmentId")
+            val compressed = compressImage(context, uri, tempFile)
+            Log.d("MediaUpload", "Original size: ${getFileSize(context, uri)} bytes")
+            Log.d("MediaUpload", "Compressed (WebP) size: ${compressed.length()} bytes")
 
-        if (attachmentId != null && attachmentId > 0) {
-            // ③ گرفتن source_url با ID
-            val mediaDto = api.getMediaById(attachmentId)
-            Log.d("MediaUpload", "Got media URL: ${mediaDto.sourceUrl}")
-            if (mediaDto.sourceUrl.isNotBlank()) return mediaDto.sourceUrl
+            // wp/v2/media نیاز به WordPress Application Password دارد (نه WooCommerce key)
+            val authHeader = if (credentialsManager.hasWpCredentials()) {
+                Log.d("MediaUpload", "Using WP Application Password for upload")
+                // WP اغلب App Password را با فاصله نشون می‌ده — باید حذف بشه قبل از encode
+                val cleanPassword = credentialsManager.wpAppPassword.replace(" ", "")
+                buildAuthHeader(credentialsManager.wpUsername, cleanPassword)
+            } else {
+                Log.w("MediaUpload", "WP Application Password not set — trying consumer key (may fail)")
+                buildAuthHeader(credentialsManager.consumerKey, credentialsManager.secretKey)
+            }
+            Log.d("MediaUpload", "wpUsername length: ${credentialsManager.wpUsername.length}")
+            Log.d("MediaUpload", "wpAppPassword length (after strip): ${credentialsManager.wpAppPassword.replace(" ", "").length}")
+
+            // ── wp/v2/media — raw binary body ─────────────────────────────
+            val requestBody = compressed.asRequestBody("image/webp".toMediaType())
+
+            val response = api.uploadMedia(
+                authHeader         = authHeader,
+                contentDisposition = "attachment; filename=\"$fileName\"",
+                contentType        = "image/webp",
+                body               = requestBody
+            )
+
+            Log.d("MediaUpload", "Upload response code: ${response.code()}")
+
+            if (!response.isSuccessful) {
+                val errorBody = response.errorBody()?.string() ?: ""
+                Log.e("MediaUpload", "Upload failed body: $errorBody")
+                throw Exception("آپلود تصویر ناموفق: ${response.code()}")
+            }
+
+            val mediaDto  = response.body()
+            val mediaId   = mediaDto?.id ?: 0
+            val sourceUrl = mediaDto?.sourceUrl ?: ""
+            Log.d("MediaUpload", "Uploaded URL: $sourceUrl  id=$mediaId")
+
+            if (sourceUrl.isBlank()) throw Exception("آپلود موفق بود اما URL تصویر دریافت نشد")
+
+            return Pair(mediaId, sourceUrl)
+
+        } finally {
+            inFlightMutex.withLock { inFlightUris.remove(uriKey) }
         }
-
-        throw Exception("آپلود موفق بود اما URL تصویر دریافت نشد (id=$attachmentId)")
     }
 
     /**
@@ -118,5 +151,36 @@ class MediaUploadDataSource @Inject constructor(
         return try {
             context.contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: 0L
         } catch (e: Exception) { 0L }
+    }
+
+    /**
+     * حذف تصویر از سرور از طریق WP REST API
+     * Authorization از OkHttp interceptor اضافه می‌شه (WP Application Password)
+     */
+    suspend fun deleteMedia(mediaId: Int) {
+        Log.d("MediaUpload", ">>> Sending DELETE wp/v2/media/$mediaId")
+        val response = api.deleteMediaWp(id = mediaId, force = true)
+        Log.d("MediaUpload", "Delete response code: ${response.code()}")
+
+        when {
+            response.isSuccessful ->
+                Log.d("MediaUpload", "<<< Delete success id=$mediaId")
+            response.code() == 401 -> throw Exception("اعتبارسنجی حذف ناموفق (401)")
+            response.code() == 404 -> throw Exception("تصویر پیدا نشد (404)")
+            response.code() == 403 -> throw Exception("دسترسی حذف مجاز نیست (403)")
+            else -> throw Exception("حذف تصویر ناموفق: ${response.code()}")
+        }
+    }
+
+    /**
+     * ساخت هدر Authorization به صورت Basic Auth
+     */
+    private fun buildAuthHeader(consumerKey: String, consumerSecret: String): String {
+        val credentials = "$consumerKey:$consumerSecret"
+        val encoded = Base64.encodeToString(
+            credentials.toByteArray(Charsets.UTF_8),
+            Base64.NO_WRAP
+        )
+        return "Basic $encoded"
     }
 }

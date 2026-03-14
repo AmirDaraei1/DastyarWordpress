@@ -13,7 +13,7 @@ fun NavController.navigateToEnterShopAddress(navOptions: NavOptions? = null) {
     navigate(EnterShopAddressNavigation, navOptions)
 }
 
-fun NavGraphBuilder.enterShopAddressNavigation(navigateToHome: (String) -> Unit) {
+fun NavGraphBuilder.enterShopAddressNavigation(navigateToHome: (ShopCredentials) -> Unit) {
     composable<EnterShopAddressNavigation> {
         EnterShopAddressRoute(navigateToHome)
     }

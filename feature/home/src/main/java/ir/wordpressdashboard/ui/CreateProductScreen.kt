@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -67,7 +68,10 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun CreateProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
+fun CreateProductScreen(
+    viewModel: CreateProductViewModel = hiltViewModel(),
+    mediaViewModel: MediaViewModel = hiltViewModel()
+) {
     val purple = Color(0xFF6251A6)
     val isCreating = viewModel.isCreating
     val createSuccess = viewModel.createSuccess
@@ -155,15 +159,21 @@ fun CreateProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(purple)
-                .padding(vertical = 16.dp, horizontal = 20.dp)
+                .statusBarsPadding()
         ) {
-            Text(
-                text = "افزودن محصول",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "افزودن محصول",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         Column(
@@ -518,7 +528,7 @@ fun CreateProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
     // ── WordPress Media Picker ─────────────────────────────────────────────
     if (showWpMediaPicker) {
         WpMediaPickerSheet(
-            viewModel = viewModel,
+            viewModel = mediaViewModel,
             onImagesSelected = { urls: List<String> ->
                 urls.forEach { url: String ->
                     if (url !in selectedWpUrls) selectedWpUrls.add(url)

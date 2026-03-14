@@ -12,9 +12,12 @@ import ir.wordpressdashboard.model.Media
 import ir.wordpressdashboard.model.Post
 import ir.wordpressdashboard.model.Products
 import ir.wordpressdashboard.usecase.CreateProductUseCase
+import ir.wordpressdashboard.usecase.DeleteMediaUseCase
+import ir.wordpressdashboard.usecase.DeleteProductUseCase
 import ir.wordpressdashboard.usecase.GetMediaUseCase
 import ir.wordpressdashboard.usecase.GetPostsUseCase
 import ir.wordpressdashboard.usecase.GetProductUseCase
+import ir.wordpressdashboard.usecase.UpdateProductUseCase
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -25,7 +28,10 @@ class ProductViewModel @Inject constructor(
     private val getPosts: GetPostsUseCase,
     private val getMedia: GetMediaUseCase,
     private val networkMonitor: NetworkMonitor,
-    private val createProductUseCase: CreateProductUseCase
+    private val createProductUseCase: CreateProductUseCase,
+    private val deleteProductUseCase: DeleteProductUseCase,
+    private val updateProductUseCase: UpdateProductUseCase,
+    private val deleteMediaUseCase: DeleteMediaUseCase
 ) : ViewModel() {
 
     companion object {
@@ -75,6 +81,8 @@ class ProductViewModel @Inject constructor(
     var isLoadingMoreMedia by mutableStateOf(false)
         private set
     var hasMoreMedia by mutableStateOf(true)
+        private set
+    var isMediaRefreshing by mutableStateOf(false)
         private set
     private var currentMediaPage = 1
     private var isMediaLoaded = false
@@ -239,6 +247,27 @@ class ProductViewModel @Inject constructor(
         }
     }
 
+    fun refreshMedia() {
+        if (isMediaRefreshing || isMediaLoading) return
+        viewModelScope.launch {
+            isMediaRefreshing = true
+            try {
+                val result = getMedia(page = 1, perPage = PAGE_SIZE_MEDIA)
+                mediaList = result
+                currentMediaPage = 1
+                hasMoreMedia = result.size >= PAGE_SIZE_MEDIA
+                isMediaLoaded = true
+                if (isOffline) isOffline = false
+                Log.d("ProductVM", "refreshMedia: ${result.size} items")
+            } catch (e: IOException) {
+                isOffline = true
+                Log.e("ProductVM", "refreshMedia offline: ${e.message}")
+            } catch (e: Exception) {
+                Log.e("ProductVM", "refreshMedia error: ${e.message}")
+            } finally { isMediaRefreshing = false }
+        }
+    }
+
     // ── Create Product ────────────────────────────────────────────────────
     var isCreating by mutableStateOf(false)
         private set
@@ -292,5 +321,115 @@ class ProductViewModel @Inject constructor(
     fun resetCreateState() {
         createSuccess = false
         createError = null
+    }
+
+    // ── Delete Product ────────────────────────────────────────────────────
+    var deleteError by mutableStateOf<String?>(null)
+        private set
+
+    fun deleteProduct(id: Int) {
+        viewModelScope.launch {
+            try {
+                deleteProductUseCase(id)
+                products = products.filter { it.id != id }
+                Log.d("ProductVM", "Product $id deleted successfully")
+            } catch (e: Exception) {
+                deleteError = "خطا در حذف محصول: ${e.message}"
+                Log.e("ProductVM", "deleteProduct error: ${e.message}", e)
+            }
+        }
+    }
+
+    fun resetDeleteError() {
+        deleteError = null
+    }
+
+    // ── Update Product ────────────────────────────────────────────────────
+    var isUpdating by mutableStateOf(false)
+        private set
+    var updateSuccess by mutableStateOf(false)
+        private set
+    var updateError by mutableStateOf<String?>(null)
+        private set
+
+    fun updateProduct(
+        id: Int,
+        name: String,
+        description: String,
+        price: String,
+        stockStatus: String,
+        existingImageUrls: List<String> = emptyList(),
+        newLocalImageUris: List<android.net.Uri> = emptyList(),
+        newWpImageUrls: List<String> = emptyList(),
+        context: android.content.Context? = null
+    ) {
+        if (isUpdating) return
+        viewModelScope.launch {
+            isUpdating = true
+            updateSuccess = false
+            updateError = null
+            try {
+                // آپلود عکس‌های جدید لوکال
+                val uploadedUrls = mutableListOf<String>()
+                if (newLocalImageUris.isNotEmpty() && context != null) {
+                    newLocalImageUris.forEachIndexed { index, uri ->
+                        Log.d("ProductVM", "Uploading new image ${index + 1}/${newLocalImageUris.size}")
+                        val url = createProductUseCase.uploadImage(context, uri).second
+                        uploadedUrls.add(url)
+                    }
+                }
+                // ترکیب همه URLها: موجود + آپلودشده + وردپرس
+                val allImageUrls = existingImageUrls + uploadedUrls + newWpImageUrls
+
+                val updated = updateProductUseCase(
+                    id = id,
+                    name = name,
+                    description = description,
+                    price = price,
+                    stockStatus = stockStatus,
+                    imageUrls = allImageUrls
+                )
+                products = products.map { if (it.id == id) updated else it }
+                updateSuccess = true
+                Log.d("ProductVM", "Product $id updated successfully")
+            } catch (e: Exception) {
+                updateError = "خطا در ویرایش محصول: ${e.message}"
+                Log.e("ProductVM", "updateProduct error: ${e.message}", e)
+            } finally {
+                isUpdating = false
+            }
+        }
+    }
+
+    fun resetUpdateState() {
+        updateSuccess = false
+        updateError = null
+    }
+
+    // ── Delete Media ──────────────────────────────────────────────────────
+    var isDeletingMedia by mutableStateOf(false)
+        private set
+    var deleteMediaError by mutableStateOf<String?>(null)
+        private set
+
+    fun deleteMedia(id: Int) {
+        viewModelScope.launch {
+            isDeletingMedia = true
+            deleteMediaError = null
+            try {
+                deleteMediaUseCase(id)
+                mediaList = mediaList.filter { it.id != id }
+                Log.d("ProductVM", "Media $id deleted successfully")
+            } catch (e: Exception) {
+                deleteMediaError = "خطا در حذف تصویر: ${e.message}"
+                Log.e("ProductVM", "deleteMedia error: ${e.message}", e)
+            } finally {
+                isDeletingMedia = false
+            }
+        }
+    }
+
+    fun resetDeleteMediaError() {
+        deleteMediaError = null
     }
 }

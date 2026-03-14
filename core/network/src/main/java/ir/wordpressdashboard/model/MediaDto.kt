@@ -16,3 +16,10 @@ data class MediaDto(
 data class MediaTitleDto(
     val rendered: String
 )
+
+@Serializable
+data class DeleteMediaResponseDto(
+    val success: Boolean,
+    val message: String
+)
+

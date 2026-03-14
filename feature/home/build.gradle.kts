@@ -18,5 +18,6 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.google.accompanist.permissions)
+    implementation(libs.google.accompanist.swiperefresh)
 }
 

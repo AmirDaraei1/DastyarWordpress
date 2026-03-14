@@ -1,16 +1,22 @@
 package ir.wordpressdashboard.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,13 +24,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,22 +48,29 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ir.wordpressdashboard.model.ProductImage
 import ir.wordpressdashboard.model.Products
 import java.text.NumberFormat
@@ -61,21 +82,41 @@ fun HomeRoute() {
 }
 
 @Composable
-fun HomeScreen(viewModel: ProductViewModel = hiltViewModel()) {
+fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
     val products = viewModel.products
     val isLoading = viewModel.isLoading
     val isLoadingMore = viewModel.isLoadingMore
     val hasMore = viewModel.hasMoreProducts
     val isOffline = viewModel.isOffline
     val isShowingCachedData = viewModel.isShowingCachedData
+    val isRefreshing = viewModel.isRefreshing
 
     var selectedTab by remember { mutableStateOf(BottomNavItem.CreateProduct) }
     var selectedProduct by remember { mutableStateOf<Products?>(null) }
+    var editingProduct by remember { mutableStateOf<Products?>(null) }
+    var productToDelete by remember { mutableStateOf<Products?>(null) }
+    var selectedPost by remember { mutableStateOf<ir.wordpressdashboard.model.Post?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadProducts()
     }
 
+    // صفحه ویرایش محصول
+    if (editingProduct != null) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            EditProductScreen(
+                product = editingProduct!!,
+                onBack = { editingProduct = null },
+                onProductUpdated = { updated ->
+                    viewModel.updateProductInList(updated)
+                    editingProduct = null
+                }
+            )
+        }
+        return
+    }
+
+    // صفحه جزئیات محصول
     if (selectedProduct != null) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             ProductDetailScreen(
@@ -86,8 +127,64 @@ fun HomeScreen(viewModel: ProductViewModel = hiltViewModel()) {
         return
     }
 
+    // صفحه جزئیات / ویرایش پست
+    if (selectedPost != null) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            PostDetailScreen(
+                post = selectedPost!!,
+                onBack = { selectedPost = null },
+                onPostUpdated = { updated -> selectedPost = updated }
+            )
+        }
+        return
+    }
+
+    // دیالوگ تأیید حذف
+    if (productToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { productToDelete = null },
+            title = {
+                Text(
+                    text = "حذف محصول",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Text(
+                    text = "آیا از حذف «${productToDelete!!.name}» مطمئن هستید؟\nاین عمل قابل بازگشت نیست.",
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteProduct(productToDelete!!.id)
+                        productToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
+                ) {
+                    Text("بله، حذف شود", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { productToDelete = null }) {
+                    Text("انصراف")
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            contentWindowInsets = WindowInsets(0),
             bottomBar = {
                 AppBottomNavigationBar(
                     selectedItem = selectedTab,
@@ -108,13 +205,17 @@ fun HomeScreen(viewModel: ProductViewModel = hiltViewModel()) {
                         hasMore = hasMore,
                         isOffline = isOffline,
                         isShowingCachedData = isShowingCachedData,
+                        isRefreshing = isRefreshing,
                         onLoadMore = { viewModel.loadNextPage() },
                         onProductClick = { selectedProduct = it },
-                        onRetry = { viewModel.refreshProducts() }
+                        onRetry = { viewModel.refreshProducts() },
+                        onRefresh = { viewModel.refreshProducts() },
+                        onDeleteProduct = { product -> productToDelete = product },
+                        onEditProduct = { product -> editingProduct = product }
                     )
                     BottomNavItem.CreateProduct -> CreateProductScreen()
                     BottomNavItem.Media -> MediaListScreen()
-                    BottomNavItem.Posts -> PostsListScreen()
+                    BottomNavItem.Posts -> PostsListScreen(onPostClick = { selectedPost = it })
                 }
             }
         }
@@ -131,7 +232,9 @@ fun AppBottomNavigationBar(
 
     NavigationBar(
         containerColor = Color.White,
-        tonalElevation = 8.dp
+        tonalElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth(),
+        windowInsets = WindowInsets(0)
     ) {
         items.forEach { item ->
             val isSelected = item == selectedItem
@@ -164,6 +267,7 @@ fun AppBottomNavigationBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     products: List<Products>,
@@ -172,9 +276,13 @@ fun HomeScreenContent(
     hasMore: Boolean = false,
     isOffline: Boolean = false,
     isShowingCachedData: Boolean = false,
+    isRefreshing: Boolean = false,
     onLoadMore: () -> Unit = {},
     onProductClick: (Products) -> Unit = {},
-    onRetry: () -> Unit = {}
+    onRetry: () -> Unit = {},
+    onRefresh: () -> Unit = {},
+    onDeleteProduct: (Products) -> Unit = {},
+    onEditProduct: (Products) -> Unit = {}
 ) {
     val listState = rememberLazyListState()
 
@@ -192,6 +300,11 @@ fun HomeScreenContent(
         }
     }
 
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize()
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -202,19 +315,25 @@ fun HomeScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF6251A6))
-                .padding(vertical = 16.dp, horizontal = 20.dp)
+                .statusBarsPadding()
         ) {
-            Text(
-                text = "محصولات",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "محصولات",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // ── بنر آفلاین ────────────────────────────────────────────────────
-        androidx.compose.animation.AnimatedVisibility(visible = isOffline) {
+        AnimatedVisibility(visible = isOffline) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -308,10 +427,15 @@ fun HomeScreenContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(items = products, key = { "product_${it.id}" }) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { onProductClick(product) }
-                        )
+                        SwipeActionsRow(
+                            onEdit = { onEditProduct(product) },
+                            onDelete = { onDeleteProduct(product) }
+                        ) {
+                            ProductCard(
+                                product = product,
+                                onClick = { onProductClick(product) }
+                            )
+                        }
                     }
                     if (isLoadingMore) {
                         item {
@@ -349,6 +473,7 @@ fun HomeScreenContent(
             }
         }
     }
+    } // end SwipeRefresh
 }
 
 @Composable
@@ -482,3 +607,106 @@ fun HomeScreenPreview() {
 fun HomeScreenLoadingPreview() {
     HomeScreenContent(products = emptyList(), isLoading = true)
 }
+
+@Composable
+fun SwipeActionsRow(
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val actionWidth = 140.dp   // total width of the two buttons revealed
+    val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        // ── Action buttons (revealed behind the card) ──────────────────
+        Row(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(12.dp)),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Edit button
+            Box(
+                modifier = Modifier
+                    .width(70.dp)
+                    .fillMaxSize()
+                    .background(Color(0xFF1976D2))
+                    .clickable {
+                        scope.launch {
+                            offsetX.animateTo(0f, tween(300))
+                        }
+                        onEdit()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "ویرایش",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text("ویرایش", color = Color.White, fontSize = 11.sp)
+                }
+            }
+            // Delete button
+            Box(
+                modifier = Modifier
+                    .width(70.dp)
+                    .fillMaxSize()
+                    .background(Color(0xFFE53935))
+                    .clickable {
+                        scope.launch {
+                            offsetX.animateTo(0f, tween(300))
+                        }
+                        onDelete()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "حذف",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text("حذف", color = Color.White, fontSize = 11.sp)
+                }
+            }
+        }
+
+        // ── Draggable card ─────────────────────────────────────────────
+        val actionWidthPx = with(LocalDensity.current) { actionWidth.toPx() }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset { IntOffset(offsetX.value.toInt(), 0) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            scope.launch {
+                                if (offsetX.value < -actionWidthPx / 2) {
+                                    offsetX.animateTo(-actionWidthPx, tween(300))
+                                } else {
+                                    offsetX.animateTo(0f, tween(300))
+                                }
+                            }
+                        },
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                val newValue = (offsetX.value + dragAmount).coerceIn(-actionWidthPx, 0f)
+                                offsetX.snapTo(newValue)
+                            }
+                        }
+                    )
+                }
+        ) {
+            content()
+        }
+    }
+}
+

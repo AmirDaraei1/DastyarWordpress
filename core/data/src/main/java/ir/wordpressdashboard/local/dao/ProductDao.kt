@@ -22,6 +22,9 @@ interface ProductDao {
     @Query("DELETE FROM products WHERE page = :page")
     suspend fun deleteProductsByPage(page: Int)
 
+    @Query("DELETE FROM products WHERE id = :productId")
+    suspend fun deleteProductById(productId: Int)
+
     // ── Images ───────────────────────────────────────────────────────────
 
     @Query("SELECT * FROM product_images WHERE productId = :productId")
@@ -32,6 +35,9 @@ interface ProductDao {
 
     @Query("DELETE FROM product_images WHERE productId IN (SELECT id FROM products WHERE page = :page)")
     suspend fun deleteImagesForPage(page: Int)
+
+    @Query("DELETE FROM product_images WHERE productId = :productId")
+    suspend fun deleteImagesForProduct(productId: Int)
 
     // ── Combined save ────────────────────────────────────────────────────
 

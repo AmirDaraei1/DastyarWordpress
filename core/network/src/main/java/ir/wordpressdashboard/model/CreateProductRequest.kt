@@ -1,6 +1,8 @@
 @file:OptIn(kotlinx.serialization.InternalSerializationApi::class)
 package ir.wordpressdashboard.model
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,7 +17,9 @@ data class CreateProductRequest(
     val images: List<ProductImageRequest> = emptyList()
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ProductImageRequest(
-    val src: String
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val id: Int? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val src: String? = null
 )

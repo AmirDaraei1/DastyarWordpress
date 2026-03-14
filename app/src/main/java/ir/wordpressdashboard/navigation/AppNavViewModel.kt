@@ -20,4 +20,10 @@ class AppNavViewModel @Inject constructor(
             )
         }
     }
+
+    fun saveWpCredentials(username: String, appPassword: String) {
+        if (username.isNotBlank() && appPassword.isNotBlank()) {
+            credentialsRepository.saveWpCredentials(username, appPassword)
+        }
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,15 +38,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ir.wordpressdashboard.model.Post
 
 @Composable
-fun PostsListScreen(viewModel: ProductViewModel = hiltViewModel()) {
+fun PostsListScreen(
+    onPostClick: (Post) -> Unit = {},
+    viewModel: PostsViewModel = hiltViewModel()
+) {
     val posts = viewModel.posts
     val isLoading = viewModel.isPostsLoading
     val isLoadingMore = viewModel.isLoadingMorePosts
     val hasMore = viewModel.hasMorePosts
     val isOffline = viewModel.isOffline
+    val isRefreshing = viewModel.isPostsRefreshing
 
     LaunchedEffect(Unit) { viewModel.loadPosts() }
 
@@ -61,6 +69,11 @@ fun PostsListScreen(viewModel: ProductViewModel = hiltViewModel()) {
             viewModel.loadNextPostsPage()
     }
 
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+        onRefresh = { viewModel.refreshPosts() },
+        modifier = Modifier.fillMaxSize()
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,15 +84,21 @@ fun PostsListScreen(viewModel: ProductViewModel = hiltViewModel()) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF6251A6))
-                .padding(vertical = 16.dp, horizontal = 20.dp)
+                .statusBarsPadding()
         ) {
-            Text(
-                text = "پست‌ها",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "پست‌ها",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // ── بنر آفلاین ────────────────────────────────────────────────────
@@ -157,7 +176,7 @@ fun PostsListScreen(viewModel: ProductViewModel = hiltViewModel()) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(posts, key = { "post_${it.id}" }) { post ->
-                        PostCard(post = post)
+                        PostCard(post = post, onClick = { onPostClick(post) })
                     }
                     if (isLoadingMore) {
                         item {
@@ -191,12 +210,15 @@ fun PostsListScreen(viewModel: ProductViewModel = hiltViewModel()) {
             }
         }
     }
+    } // end SwipeRefresh
 }
 
 @Composable
-fun PostCard(post: Post) {
+fun PostCard(post: Post, onClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -231,11 +253,44 @@ fun PostCard(post: Post) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = "شناسه: ${post.id}",
-                    fontSize = 11.sp,
-                    color = Color(0xFF9E9E9E)
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "شناسه: ${post.id}",
+                        fontSize = 11.sp,
+                        color = Color(0xFF9E9E9E)
+                    )
+                    if (post.status.isNotEmpty()) {
+                        val (label, bg, fg) = when (post.status) {
+                            "publish" -> Triple("منتشر", Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                            "draft" -> Triple("پیش‌نویس", Color(0xFFFFF9C4), Color(0xFFF57F17))
+                            "private" -> Triple("خصوصی", Color(0xFFE3F2FD), Color(0xFF1565C0))
+                            else -> Triple(post.status, Color(0xFFF5F5F5), Color(0xFF666666))
+                        }
+                        Surface(
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                            color = bg
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = fg,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+                if (post.date.isNotEmpty()) {
+                    Spacer(modifier = Modifier.size(2.dp))
+                    Text(
+                        text = post.date.take(10),
+                        fontSize = 11.sp,
+                        color = Color(0xFFBBBBBB)
+                    )
+                }
             }
         }
     }

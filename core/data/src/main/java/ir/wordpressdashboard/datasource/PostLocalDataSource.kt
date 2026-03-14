@@ -9,10 +9,33 @@ class PostLocalDataSource @Inject constructor(
     private val dao: PostDao
 ) {
     suspend fun getPosts(page: Int): List<Post> =
-        dao.getPostsByPage(page).map { Post(id = it.id, title = it.title) }
+        dao.getPostsByPage(page).map { it.toDomain() }
 
     suspend fun savePosts(page: Int, posts: List<Post>) {
         dao.deletePostsByPage(page)
-        dao.insertPosts(posts.map { PostEntity(id = it.id, title = it.title, page = page) })
+        dao.insertPosts(posts.map { it.toEntity(page) })
     }
+
+    suspend fun savePost(post: Post) {
+        dao.insertPost(post.toEntity())
+    }
+
+    private fun PostEntity.toDomain() = Post(
+        id = id,
+        title = title,
+        content = content,
+        excerpt = excerpt,
+        status = status,
+        date = date
+    )
+
+    private fun Post.toEntity(page: Int = 0) = PostEntity(
+        id = id,
+        title = title,
+        content = content,
+        excerpt = excerpt,
+        status = status,
+        date = date,
+        page = page
+    )
 }

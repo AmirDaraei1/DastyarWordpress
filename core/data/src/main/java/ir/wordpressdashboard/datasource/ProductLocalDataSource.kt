@@ -50,4 +50,31 @@ class ProductLocalDataSource @Inject constructor(
         }
         dao.saveProductsForPage(page, entities, imageEntities)
     }
+
+    suspend fun deleteProduct(productId: Int) {
+        dao.deleteImagesForProduct(productId)
+        dao.deleteProductById(productId)
+    }
+
+    suspend fun updateProduct(product: ir.wordpressdashboard.model.Products) {
+        dao.insertProducts(listOf(
+            ir.wordpressdashboard.local.entity.ProductEntity(
+                id = product.id,
+                name = product.name,
+                price = product.price,
+                description = product.description,
+                permalink = product.permalink,
+                stockStatus = product.stock_status,
+                page = 1
+            )
+        ))
+        dao.deleteImagesForProduct(product.id)
+        dao.insertImages(product.images.map {
+            ir.wordpressdashboard.local.entity.ProductImageEntity(
+                imageId = it.id,
+                productId = product.id,
+                src = it.src
+            )
+        })
+    }
 }

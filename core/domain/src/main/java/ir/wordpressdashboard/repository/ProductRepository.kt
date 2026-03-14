@@ -10,7 +10,17 @@ interface ProductRepository {
         description: String,
         price: String,
         stockStatus: String,
-        imageUris: List<String> = emptyList()
+        imageUris: List<String> = emptyList(),
+        imageIds: List<Int> = emptyList()
+    ): Products
+    suspend fun deleteProduct(id: Int)
+    suspend fun updateProduct(
+        id: Int,
+        name: String,
+        description: String,
+        price: String,
+        stockStatus: String,
+        imageUrls: List<String>
     ): Products
 }
 

@@ -1,6 +1,7 @@
 [versions]
 accompanistPagerVersion = "0.28.0"
 accompanistPermissionsVersion = "0.34.0"
+accompanistSwipeRefreshVersion = "0.27.0"
 androidGradlePlugin = "8.3.1"
 androidTools = "31.4.0"
 androidxActivity = "1.9.0"
@@ -54,6 +55,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 # Hilt
 google-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPagerVersion" }
 google-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissionsVersion" }
+google-accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwipeRefreshVersion" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 # End

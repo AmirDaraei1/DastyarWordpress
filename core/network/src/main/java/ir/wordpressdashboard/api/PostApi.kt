@@ -1,7 +1,11 @@
 package ir.wordpressdashboard.api
 
 import ir.wordpressdashboard.model.PostDto
+import ir.wordpressdashboard.model.UpdatePostRequest
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface PostApi {
@@ -10,4 +14,13 @@ interface PostApi {
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 10
     ): List<PostDto>
+
+    @GET("wp/v2/posts/{id}")
+    suspend fun getPost(@Path("id") id: Int): PostDto
+
+    @POST("wp/v2/posts/{id}")
+    suspend fun updatePost(
+        @Path("id") id: Int,
+        @Body request: UpdatePostRequest
+    ): PostDto
 }

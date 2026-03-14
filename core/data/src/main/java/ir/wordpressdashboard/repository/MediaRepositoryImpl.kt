@@ -21,6 +21,11 @@ class MediaRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteMedia(id: Int) {
+        remoteDataSource.deleteMedia(id)
+        localDataSource.deleteMedia(id)
+    }
+
     private fun MediaDto.toDomain(): Media = Media(
         id = id,
         title = title.rendered,

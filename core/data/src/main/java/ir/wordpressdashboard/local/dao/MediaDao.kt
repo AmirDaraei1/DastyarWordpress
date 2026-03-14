@@ -20,6 +20,9 @@ interface MediaDao {
     @Query("DELETE FROM media WHERE page = :page")
     suspend fun deleteMediaByPage(page: Int)
 
+    @Query("DELETE FROM media WHERE id = :id")
+    suspend fun deleteMediaById(id: Int)
+
     @Query("DELETE FROM media")
     suspend fun deleteAllMedia()
 }

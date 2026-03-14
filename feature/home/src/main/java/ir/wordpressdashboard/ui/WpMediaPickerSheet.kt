@@ -44,7 +44,7 @@ import coil.request.ImageRequest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WpMediaPickerSheet(
-    viewModel: ProductViewModel,
+    viewModel: MediaViewModel,
     onImagesSelected: (List<String>) -> Unit,
     onDismiss: () -> Unit
 ) {

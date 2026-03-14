@@ -32,4 +32,8 @@ class MediaLocalDataSource @Inject constructor(
             )
         })
     }
+
+    suspend fun deleteMedia(id: Int) {
+        dao.deleteMediaById(id)
+    }
 }

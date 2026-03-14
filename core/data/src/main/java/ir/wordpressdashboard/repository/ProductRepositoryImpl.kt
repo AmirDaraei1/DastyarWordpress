@@ -33,10 +33,15 @@ class ProductRepositoryImpl @Inject constructor(
         description: String,
         price: String,
         stockStatus: String,
-        imageUris: List<String>
+        imageUris: List<String>,
+        imageIds: List<Int>
     ): Products {
-        // imageUris اینجا src های آپلودشده هستند (URL کامل)
-        val imageRequests = imageUris.map { src -> ProductImageRequest(src = src) }
+        // اگر imageIds موجود باشه، فقط id می‌فرستیم — WooCommerce کپی نمی‌گیره
+        val imageRequests = if (imageIds.isNotEmpty()) {
+            imageIds.map { id -> ProductImageRequest(id = id) }
+        } else {
+            imageUris.map { src -> ProductImageRequest(src = src) }
+        }
 
         val request = CreateProductRequest(
             name = name,
@@ -46,6 +51,31 @@ class ProductRepositoryImpl @Inject constructor(
             images = imageRequests
         )
         return remoteDataSource.createProduct(request).toDomain()
+    }
+
+    override suspend fun deleteProduct(id: Int) {
+        remoteDataSource.deleteProduct(id)
+        localDataSource.deleteProduct(id)
+    }
+
+    override suspend fun updateProduct(
+        id: Int,
+        name: String,
+        description: String,
+        price: String,
+        stockStatus: String,
+        imageUrls: List<String>
+    ): Products {
+        val request = CreateProductRequest(
+            name = name,
+            description = description,
+            regularPrice = price,
+            stockStatus = stockStatus,
+            images = imageUrls.map { ProductImageRequest(src = it) }
+        )
+        val updated = remoteDataSource.updateProduct(id, request).toDomain()
+        localDataSource.updateProduct(updated)
+        return updated
     }
 
     private fun ProductsDto.toDomain(): Products = Products(

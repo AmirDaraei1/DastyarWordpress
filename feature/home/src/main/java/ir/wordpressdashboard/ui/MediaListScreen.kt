@@ -10,18 +10,30 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -50,15 +62,17 @@ import coil.request.ImageRequest
 import ir.wordpressdashboard.model.Media
 
 @Composable
-fun MediaListScreen(viewModel: ProductViewModel = hiltViewModel()) {
+fun MediaListScreen(viewModel: MediaViewModel = hiltViewModel()) {
     val mediaList = viewModel.mediaList
     val isLoading = viewModel.isMediaLoading
     val isLoadingMore = viewModel.isLoadingMoreMedia
     val hasMore = viewModel.hasMoreMedia
     val isOffline = viewModel.isOffline
+    val isRefreshing = viewModel.isMediaRefreshing
 
     // ایندکس عکس انتخاب‌شده برای نمایش detail (-1 = هیچ‌کدام)
     var selectedIndex by remember { mutableIntStateOf(-1) }
+    var mediaToDelete by remember { mutableStateOf<Media?>(null) }
 
     LaunchedEffect(Unit) { viewModel.loadMedia() }
 
@@ -72,6 +86,48 @@ fun MediaListScreen(viewModel: ProductViewModel = hiltViewModel()) {
             )
         }
         return
+    }
+
+    // دیالوگ تأیید حذف
+    if (mediaToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { mediaToDelete = null },
+            title = {
+                Text(
+                    text = "حذف تصویر",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Text(
+                    text = "آیا از حذف «${mediaToDelete!!.title.ifEmpty { "این تصویر" }}» مطمئن هستید؟\nاین عمل قابل بازگشت نیست.",
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteMedia(mediaToDelete!!.id)
+                        mediaToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
+                ) {
+                    Text("بله، حذف شود", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { mediaToDelete = null }) {
+                    Text("انصراف")
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
     }
 
     val gridState = rememberLazyGridState()
@@ -88,25 +144,36 @@ fun MediaListScreen(viewModel: ProductViewModel = hiltViewModel()) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+        onRefresh = { viewModel.refreshMedia() },
+        modifier = Modifier.fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+        ) {
         // Top Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF6251A6))
-                .padding(vertical = 16.dp, horizontal = 20.dp)
+                .statusBarsPadding()
         ) {
-            Text(
-                text = "تصاویر",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "تصاویر",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         // بنر آفلاین
@@ -175,7 +242,8 @@ fun MediaListScreen(viewModel: ProductViewModel = hiltViewModel()) {
                     itemsIndexed(mediaList, key = { _, item -> "media_${item.id}" }) { index, media ->
                         MediaGridItem(
                             media = media,
-                            onClick = { selectedIndex = index }
+                            onClick = { selectedIndex = index },
+                            onDeleteClick = { mediaToDelete = media }
                         )
                     }
                     // loading more indicator
@@ -207,13 +275,15 @@ fun MediaListScreen(viewModel: ProductViewModel = hiltViewModel()) {
                 }
             }
         }
-    }
+    } // end Column
+    } // end SwipeRefresh
 }
 
 @Composable
 fun MediaGridItem(
     media: Media,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     Card(
@@ -252,6 +322,25 @@ fun MediaGridItem(
                             else -> "📎"
                         },
                         fontSize = 36.sp
+                    )
+                }
+
+                // دکمه حذف — گوشه بالا سمت چپ
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(6.dp)
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xCCE53935))
+                        .clickable { onDeleteClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "حذف",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }

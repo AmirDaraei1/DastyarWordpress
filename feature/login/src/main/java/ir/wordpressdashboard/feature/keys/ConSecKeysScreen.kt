@@ -40,14 +40,20 @@ fun ConSecKeysRoute(navigateToEnterShopAddress: () -> Unit) {
     var siteAddress by remember { mutableStateOf("") }
     var consumerKey by remember { mutableStateOf("") }
     var secretKey by remember { mutableStateOf("") }
+    var wpUsername by remember { mutableStateOf("") }
+    var wpAppPassword by remember { mutableStateOf("") }
 
     ConSecKeysScreen(
         siteAddress = siteAddress,
         consumerKey = consumerKey,
         secretKey = secretKey,
+        wpUsername = wpUsername,
+        wpAppPassword = wpAppPassword,
         onSiteAddressChanged = { siteAddress = it },
         onConsumerKeyChanged = { consumerKey = it },
         onSecretKeyChanged = { secretKey = it },
+        onWpUsernameChanged = { wpUsername = it },
+        onWpAppPasswordChanged = { wpAppPassword = it },
         onNextClick = navigateToEnterShopAddress
     )
 }
@@ -58,9 +64,13 @@ fun ConSecKeysScreen(
     siteAddress: String = "",
     consumerKey: String = "",
     secretKey: String = "",
+    wpUsername: String = "",
+    wpAppPassword: String = "",
     onSiteAddressChanged: (String) -> Unit,
     onConsumerKeyChanged: (String) -> Unit,
     onSecretKeyChanged: (String) -> Unit,
+    onWpUsernameChanged: (String) -> Unit = {},
+    onWpAppPasswordChanged: (String) -> Unit = {},
     onNextClick: () -> Unit
 ) {
     val stepActive = Color(0xFF6251A6)
@@ -227,6 +237,83 @@ fun ConSecKeysScreen(
             )
         }
 
+        Spacer(Modifier.height(24.dp))
+
+        // WP Username Input Box
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth()
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(inputBackground, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "نام کاربری وردپرس",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = wpUsername,
+                        onValueChange = onWpUsernameChanged,
+                        placeholder = { Text("") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        // WP App Password Input Box
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .fillMaxWidth()
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(inputBackground, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "رمز عبور برنامه وردپرس",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextField(
+                        value = wpAppPassword,
+                        onValueChange = onWpAppPasswordChanged,
+                        placeholder = { Text("") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                }
+            }
+        }
+
         Spacer(Modifier.weight(1f))
 
         // Login Button
@@ -284,9 +371,13 @@ fun PreviewConSecKeysScreen() {
         siteAddress = "",
         consumerKey = "",
         secretKey = "",
+        wpUsername = "",
+        wpAppPassword = "",
         onSiteAddressChanged = {},
         onConsumerKeyChanged = {},
         onSecretKeyChanged = {},
+        onWpUsernameChanged = {},
+        onWpAppPasswordChanged = {},
         onNextClick = {}
     )
 }

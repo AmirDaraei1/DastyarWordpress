@@ -45,8 +45,9 @@ fun AppNavHost(
         )
         conSecKeysScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
         qrCodeScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
-        enterShopAddressNavigation(navigateToHome = { address ->
-            viewModel.saveSiteAddress(address)
+        enterShopAddressNavigation(navigateToHome = { credentials ->
+            viewModel.saveSiteAddress(credentials.address)
+            viewModel.saveWpCredentials(credentials.wpUsername, credentials.wpAppPassword)
             navController.navigateToHome()
         })
         homeScreen()

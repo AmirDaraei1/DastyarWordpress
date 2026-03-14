@@ -10,20 +10,32 @@ class PostRepositoryImpl @Inject constructor(
     private val remoteDataSource: PostRemoteDataSource,
     private val localDataSource: PostLocalDataSource
 ) : PostRepository {
+
     override suspend fun getPosts(page: Int, perPage: Int): List<Post> {
         return try {
-            // همیشه از شبکه بخواه (حتی آفلاین — exception می‌اندازه)
             val result = remoteDataSource.getPosts(page = page, perPage = perPage)
                 .map { it.toDomain() }
-            // موفق شد → در دیتابیس ذخیره کن
             localDataSource.savePosts(page, result)
             result
         } catch (e: Exception) {
-            // شبکه خطا داد → از دیتابیس بخواه
             val cached = localDataSource.getPosts(page)
             if (cached.isNotEmpty()) cached else throw e
         }
     }
 
-    private fun PostDto.toDomain(): Post = Post(id = id, title = title.rendered)
+    override suspend fun updatePost(id: Int, title: String, content: String, status: String): Post {
+        val dto = remoteDataSource.updatePost(id = id, title = title, content = content, status = status)
+        val post = dto.toDomain()
+        localDataSource.savePost(post)
+        return post
+    }
+
+    private fun PostDto.toDomain(): Post = Post(
+        id = id,
+        title = title.rendered,
+        content = content?.rendered ?: "",
+        excerpt = excerpt?.rendered ?: "",
+        status = status ?: "publish",
+        date = date ?: ""
+    )
 }
