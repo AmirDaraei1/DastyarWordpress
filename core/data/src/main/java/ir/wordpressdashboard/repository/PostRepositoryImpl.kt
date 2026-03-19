@@ -23,11 +23,23 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun createPost(title: String, content: String, excerpt: String, status: String): Post {
+        val dto = remoteDataSource.createPost(title = title, content = content, excerpt = excerpt, status = status)
+        val post = dto.toDomain()
+        localDataSource.savePost(post)
+        return post
+    }
+
     override suspend fun updatePost(id: Int, title: String, content: String, status: String): Post {
         val dto = remoteDataSource.updatePost(id = id, title = title, content = content, status = status)
         val post = dto.toDomain()
         localDataSource.savePost(post)
         return post
+    }
+
+    override suspend fun deletePost(id: Int) {
+        remoteDataSource.deletePost(id)
+        localDataSource.deletePost(id)
     }
 
     private fun PostDto.toDomain(): Post = Post(

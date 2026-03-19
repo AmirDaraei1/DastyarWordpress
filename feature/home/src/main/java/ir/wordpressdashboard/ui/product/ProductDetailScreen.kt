@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.product
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,7 +61,11 @@ fun ProductDetailScreen(
     onBack: () -> Unit
 ) {
     val purple = Color(0xFF6251A6)
-    val inStock = product.stock_status == "instock"
+    val (statusLabel, statusBg, statusFg) = when (product.stock_status) {
+        "instock"     -> Triple("✓ موجود در انبار", Color(0xFFE8F5E9), Color(0xFF2E7D32))
+        "onbackorder" -> Triple("⏳ پیش‌فروش",      Color(0xFFFFF3E0), Color(0xFFE65100))
+        else          -> Triple("✗ ناموجود",        Color(0xFFFFEBEE), Color(0xFFC62828))
+    }
 
     // Handle system back button
     BackHandler { onBack() }
@@ -307,14 +311,14 @@ fun ProductDetailScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
-                            .background(if (inStock) Color(0xFFE8F5E9) else Color(0xFFFFEBEE))
+                            .background(statusBg)
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = if (inStock) "✓ موجود در انبار" else "✗ ناموجود",
+                            text = statusLabel,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (inStock) Color(0xFF2E7D32) else Color(0xFFC62828)
+                            color = statusFg
                         )
                     }
                     if (product.price.isNotEmpty()) {

@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.media
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background

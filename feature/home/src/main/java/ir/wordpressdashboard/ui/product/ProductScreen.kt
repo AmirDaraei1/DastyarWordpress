@@ -1,5 +1,12 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.product
 
+import ir.wordpressdashboard.ui.navigation.BottomNavItem
+import ir.wordpressdashboard.ui.create_product.CreateProductScreen
+import ir.wordpressdashboard.ui.media.MediaListScreen
+import ir.wordpressdashboard.ui.post.PostsListScreen
+import ir.wordpressdashboard.ui.edit_product.EditProductScreen
+import ir.wordpressdashboard.ui.post.CreatePostScreen
+import ir.wordpressdashboard.ui.post.PostDetailScreen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -25,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -34,6 +42,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -96,7 +105,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
     var editingProduct by remember { mutableStateOf<Products?>(null) }
     var productToDelete by remember { mutableStateOf<Products?>(null) }
     var selectedPost by remember { mutableStateOf<ir.wordpressdashboard.model.Post?>(null) }
-
+    var isCreatingPost by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         viewModel.loadProducts()
     }
@@ -134,6 +143,17 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
                 post = selectedPost!!,
                 onBack = { selectedPost = null },
                 onPostUpdated = { updated -> selectedPost = updated }
+            )
+        }
+        return
+    }
+
+    // صفحه ایجاد پست جدید
+    if (isCreatingPost) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            CreatePostScreen(
+                onBack = { isCreatingPost = false },
+                onPostCreated = { isCreatingPost = false }
             )
         }
         return
@@ -215,7 +235,22 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
                     )
                     BottomNavItem.CreateProduct -> CreateProductScreen()
                     BottomNavItem.Media -> MediaListScreen()
-                    BottomNavItem.Posts -> PostsListScreen(onPostClick = { selectedPost = it })
+                    BottomNavItem.Posts -> Box(modifier = Modifier.fillMaxSize()) {
+                        PostsListScreen(onPostClick = { selectedPost = it })
+                        FloatingActionButton(
+                            onClick = { isCreatingPost = true },
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp),
+                            containerColor = Color(0xFF6251A6),
+                            contentColor = Color.White
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "ایجاد پست جدید"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -536,11 +571,15 @@ fun ProductCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val inStock = product.stock_status == "instock"
+                val (statusText, statusColor) = when (product.stock_status) {
+                    "instock"     -> "✓ موجود"      to Color(0xFF4CAF50)
+                    "onbackorder" -> "⏳ پیش‌فروش"  to Color(0xFFE65100)
+                    else          -> "✗ ناموجود"    to Color(0xFFE53935)
+                }
                 Text(
-                    text = if (inStock) "✓ موجود" else "✗ ناموجود",
+                    text = statusText,
                     fontSize = 11.sp,
-                    color = if (inStock) Color(0xFF4CAF50) else Color(0xFFE53935),
+                    color = statusColor,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -709,4 +748,3 @@ fun SwipeActionsRow(
         }
     }
 }
-

@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.edit_product
 
 import android.Manifest
 import android.content.Context
@@ -45,6 +45,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import ir.wordpressdashboard.model.Products
+import ir.wordpressdashboard.ui.media.MediaViewModel
+import ir.wordpressdashboard.ui.media.WpMediaPickerSheet
 import kotlinx.coroutines.launch
 import java.io.File
 

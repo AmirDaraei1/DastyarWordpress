@@ -5,8 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import ir.wordpressdashboard.ui.homeScreen
-import ir.wordpressdashboard.ui.navigateToHome
+import ir.wordpressdashboard.ui.navigation.homeScreen
+import ir.wordpressdashboard.ui.navigation.navigateToHome
 import ir.wordpressdashboard.feature.introduction.introductionScreen
 import ir.wordpressdashboard.feature.introduction.navigateToIntroduction
 import ir.wordpressdashboard.feature.keys.conSecKeysScreen

@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.post
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.wordpressdashboard.common.NetworkMonitor
 import ir.wordpressdashboard.model.Post
+import ir.wordpressdashboard.usecase.DeletePostUseCase
 import ir.wordpressdashboard.usecase.GetPostsUseCase
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PostsViewModel @Inject constructor(
     private val getPosts: GetPostsUseCase,
+    private val deletePostUseCase: DeletePostUseCase,
     private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
@@ -40,6 +42,15 @@ class PostsViewModel @Inject constructor(
         private set
 
     var isOffline by mutableStateOf(false)
+        private set
+
+    var isDeletingPost by mutableStateOf(false)
+        private set
+
+    var deletePostError by mutableStateOf<String?>(null)
+        private set
+
+    var deletePostSuccess by mutableStateOf(false)
         private set
 
     private var currentPostsPage = 1
@@ -66,7 +77,7 @@ class PostsViewModel @Inject constructor(
                 currentPostsPage = 1
                 hasMorePosts = result.size >= PAGE_SIZE
                 isPostsLoaded = true
-                if (result.isNotEmpty() && isOffline) isOffline = false
+                isOffline = false  // موفق بود، آنلاین هستیم حتی اگر لیست خالی باشد
                 Log.d("PostsVM", "loadPosts page 1: ${result.size} items")
             } catch (e: IOException) {
                 isOffline = true
@@ -113,7 +124,7 @@ class PostsViewModel @Inject constructor(
                 currentPostsPage = 1
                 hasMorePosts = result.size >= PAGE_SIZE
                 isPostsLoaded = true
-                if (isOffline) isOffline = false
+                isOffline = false  // موفق بود، آنلاین هستیم حتی اگر لیست خالی باشد
                 Log.d("PostsVM", "refreshPosts: ${result.size} items")
             } catch (e: IOException) {
                 isOffline = true
@@ -124,5 +135,33 @@ class PostsViewModel @Inject constructor(
                 isPostsRefreshing = false
             }
         }
+    }
+
+    fun deletePost(postId: Int) {
+        if (isDeletingPost) return
+        viewModelScope.launch {
+            isDeletingPost = true
+            deletePostError = null
+            deletePostSuccess = false
+            try {
+                deletePostUseCase(postId)
+                posts = posts.filter { it.id != postId }
+                deletePostSuccess = true
+                Log.d("PostsVM", "Post $postId deleted")
+            } catch (e: java.net.ConnectException) {
+                deletePostError = "اتصال به سرور برقرار نشد."
+                Log.e("PostsVM", "deletePost connect error: ${e.message}", e)
+            } catch (e: Exception) {
+                deletePostError = "خطا در حذف پست: ${e.message}"
+                Log.e("PostsVM", "deletePost error: ${e.message}", e)
+            } finally {
+                isDeletingPost = false
+            }
+        }
+    }
+
+    fun resetDeleteState() {
+        deletePostError = null
+        deletePostSuccess = false
     }
 }

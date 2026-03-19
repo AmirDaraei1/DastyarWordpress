@@ -1,5 +1,7 @@
 package ir.wordpressdashboard.repository
 
+import ir.wordpressdashboard.model.ProductCategory
+import ir.wordpressdashboard.model.ProductTag
 import ir.wordpressdashboard.model.Products
 
 interface ProductRepository {
@@ -11,7 +13,9 @@ interface ProductRepository {
         price: String,
         stockStatus: String,
         imageUris: List<String> = emptyList(),
-        imageIds: List<Int> = emptyList()
+        imageIds: List<Int> = emptyList(),
+        categoryIds: List<Int> = emptyList(),
+        tagIds: List<Int> = emptyList()
     ): Products
     suspend fun deleteProduct(id: Int)
     suspend fun updateProduct(
@@ -22,5 +26,8 @@ interface ProductRepository {
         stockStatus: String,
         imageUrls: List<String>
     ): Products
+    suspend fun getCategories(): List<ProductCategory>
+    suspend fun getTags(): List<ProductTag>
+    suspend fun createCategory(name: String): ProductCategory
+    suspend fun createTag(name: String): ProductTag
 }
-

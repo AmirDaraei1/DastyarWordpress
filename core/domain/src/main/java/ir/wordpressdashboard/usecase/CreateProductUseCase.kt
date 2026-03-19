@@ -3,6 +3,8 @@ package ir.wordpressdashboard.usecase
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import ir.wordpressdashboard.model.ProductCategory
+import ir.wordpressdashboard.model.ProductTag
 import ir.wordpressdashboard.model.Products
 import ir.wordpressdashboard.repository.MediaUploadRepository
 import ir.wordpressdashboard.repository.ProductRepository
@@ -19,7 +21,9 @@ class CreateProductUseCase @Inject constructor(
         price: String,
         stockStatus: String,
         imageUris: List<Uri> = emptyList(),
-        wpImageUrls: List<String> = emptyList()
+        wpImageUrls: List<String> = emptyList(),
+        categoryIds: List<Int> = emptyList(),
+        tagIds: List<Int> = emptyList()
     ): Products {
 
         // ① آپلود عکس‌های لوکال (گالری/دوربین)
@@ -45,7 +49,9 @@ class CreateProductUseCase @Inject constructor(
             price = price,
             stockStatus = stockStatus,
             imageUris = wpImageUrls,        // فقط WP URL ها با src
-            imageIds  = uploadedIds          // عکس‌های آپلودشده با id
+            imageIds  = uploadedIds,          // عکس‌های آپلودشده با id
+            categoryIds = categoryIds,
+            tagIds = tagIds
         )
         Log.d("CreateProduct", "Product created: id=${product.id}, images=${product.images.size}")
         return product
@@ -53,4 +59,13 @@ class CreateProductUseCase @Inject constructor(
 
     suspend fun uploadImage(context: Context, uri: Uri): Pair<Int, String> =
         mediaUploadRepository.uploadImage(context, uri)
+}
+
+class GetProductTaxonomiesUseCase @Inject constructor(
+    private val repository: ProductRepository
+) {
+    suspend fun getCategories(): List<ProductCategory> = repository.getCategories()
+    suspend fun getTags(): List<ProductTag> = repository.getTags()
+    suspend fun createCategory(name: String): ProductCategory = repository.createCategory(name)
+    suspend fun createTag(name: String): ProductTag = repository.createTag(name)
 }

@@ -20,6 +20,10 @@ class PostLocalDataSource @Inject constructor(
         dao.insertPost(post.toEntity())
     }
 
+    suspend fun deletePost(id: Int) {
+        dao.deletePostById(id)
+    }
+
     private fun PostEntity.toDomain() = Post(
         id = id,
         title = title,

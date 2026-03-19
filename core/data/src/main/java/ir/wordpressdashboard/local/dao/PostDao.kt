@@ -23,6 +23,9 @@ interface PostDao {
     @Query("DELETE FROM posts WHERE page = :page")
     suspend fun deletePostsByPage(page: Int)
 
+    @Query("DELETE FROM posts WHERE id = :id")
+    suspend fun deletePostById(id: Int)
+
     @Query("DELETE FROM posts")
     suspend fun deleteAllPosts()
 }

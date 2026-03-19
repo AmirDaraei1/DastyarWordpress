@@ -1,4 +1,4 @@
-package ir.wordpressdashboard.ui
+﻿package ir.wordpressdashboard.ui.product
 
 import android.util.Log
 import androidx.compose.runtime.getValue

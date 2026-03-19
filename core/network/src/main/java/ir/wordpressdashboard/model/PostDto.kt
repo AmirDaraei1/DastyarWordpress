@@ -27,3 +27,12 @@ data class UpdatePostRequest(
     val content: String,
     val status: String
 )
+
+@Serializable
+data class CreatePostRequest(
+    val title: String,
+    val content: String,
+    val excerpt: String = "",
+    val status: String = "draft"
+)
+
