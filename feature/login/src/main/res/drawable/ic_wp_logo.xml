@@ -1,15 +1,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
+    android:width="96dp"
+    android:height="96dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- دایره سفید پس‌زمینه لوگو -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54m-38,0a38,38 0,1 1,76 0a38,38 0,1 1,-76 0" />
-
-    <!-- حرف W وردپرس به رنگ آبی -->
+    <!-- حرف W وردپرس -->
     <path
         android:fillColor="#0073AA"
         android:pathData="M25,40 L33,72 L43,50 L54,68 L65,50 L75,72 L83,40 L75,40 L67,62 L57,44 L51,44 L41,62 L33,40 Z" />

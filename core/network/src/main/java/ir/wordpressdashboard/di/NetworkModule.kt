@@ -59,13 +59,10 @@ abstract class NetworkModule {
             logging.level = HttpLoggingInterceptor.Level.BODY
 
             val authInterceptor = Interceptor { chain ->
-                // فقط اگر request هنوز Authorization نداره، اضافه کن
                 val original = chain.request()
                 val req = if (original.header("Authorization") == null) {
-                    val auth = buildBasicAuthHeader(
-                        credentialsManager.consumerKey,
-                        credentialsManager.secretKey
-                    )
+                    val cleanPass = credentialsManager.wpAppPassword.replace(" ", "")
+                    val auth = buildBasicAuthHeader(credentialsManager.wpUsername, cleanPass)
                     original.newBuilder().addHeader("Authorization", auth).build()
                 } else original
                 chain.proceed(req)
@@ -92,13 +89,8 @@ abstract class NetworkModule {
             val authInterceptor = Interceptor { chain ->
                 val original = chain.request()
                 val req = if (original.header("Authorization") == null) {
-                    // اول WP Application Password، اگر نبود consumer key
-                    val auth = if (credentialsManager.hasWpCredentials()) {
-                        val cleanPass = credentialsManager.wpAppPassword.replace(" ", "")
-                        buildBasicAuthHeader(credentialsManager.wpUsername, cleanPass)
-                    } else {
-                        buildBasicAuthHeader(credentialsManager.consumerKey, credentialsManager.secretKey)
-                    }
+                    val cleanPass = credentialsManager.wpAppPassword.replace(" ", "")
+                    val auth = buildBasicAuthHeader(credentialsManager.wpUsername, cleanPass)
                     original.newBuilder().addHeader("Authorization", auth).build()
                 } else {
                     original

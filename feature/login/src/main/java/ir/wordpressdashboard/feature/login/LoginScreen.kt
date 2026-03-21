@@ -42,9 +42,6 @@ fun LoginRoute(
         onSecureKeyClick = {
             navigateToConSecKeys()
         },
-        onQRCodeClick = {
-            navigateToQRCode()
-        },
         onNavItemSelected = { idx ->
             selectIndex = idx
         },
@@ -101,7 +98,6 @@ fun AparatVideoView(
 @Composable
 fun LoginScreen(
     onSecureKeyClick: ()-> Unit,
-    onQRCodeClick: () -> Unit,
     onNavItemSelected: (Int) -> Unit,
     selectIndex: Int
 ) {
@@ -153,7 +149,7 @@ fun LoginScreen(
                 .height(56.dp)
         ) {
             Text(
-                text = "اتصال با کلیدهای امنیتی",
+                text = "اتصال با رمز عبور برنامه",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -162,22 +158,23 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(
-            onClick = onQRCodeClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B52E3)),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .height(56.dp)
-        ) {
-            Text(
-                text = "اتصال با QRCODE",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        // دکمه QRCode موقتاً غیرفعال شده
+        // Button(
+        //     onClick = onQRCodeClick,
+        //     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6B52E3)),
+        //     shape = RoundedCornerShape(12.dp),
+        //     modifier = Modifier
+        //         .fillMaxWidth()
+        //         .padding(horizontal = 24.dp)
+        //         .height(56.dp)
+        // ) {
+        //     Text(
+        //         text = "اتصال با QRCODE",
+        //         color = Color.White,
+        //         fontSize = 16.sp,
+        //         fontWeight = FontWeight.Bold
+        //     )
+        // }
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -241,7 +238,6 @@ fun LoginScreen(
 fun LoginPreview() {
     LoginScreen(
         onSecureKeyClick = {},
-        onQRCodeClick = {},
         onNavItemSelected = {},
         selectIndex = 1
     )

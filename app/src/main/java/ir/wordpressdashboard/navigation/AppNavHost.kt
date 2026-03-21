@@ -9,12 +9,12 @@ import ir.wordpressdashboard.ui.navigation.homeScreen
 import ir.wordpressdashboard.ui.navigation.navigateToHome
 import ir.wordpressdashboard.feature.introduction.introductionScreen
 import ir.wordpressdashboard.feature.introduction.navigateToIntroduction
-import ir.wordpressdashboard.feature.keys.conSecKeysScreen
-import ir.wordpressdashboard.feature.keys.navigateToConSecKeys
+// import ir.wordpressdashboard.feature.keys.conSecKeysScreen
+// import ir.wordpressdashboard.feature.keys.navigateToConSecKeys
 import ir.wordpressdashboard.feature.login.loginScreen
 import ir.wordpressdashboard.feature.login.navigateToLogin
-import ir.wordpressdashboard.feature.qrcode.navigateToQRCode
-import ir.wordpressdashboard.feature.qrcode.qrCodeScreen
+// import ir.wordpressdashboard.feature.qrcode.navigateToQRCode
+// import ir.wordpressdashboard.feature.qrcode.qrCodeScreen
 import ir.wordpressdashboard.feature.siteraddress.enterShopAddressNavigation
 import ir.wordpressdashboard.feature.siteraddress.navigateToEnterShopAddress
 import ir.wordpressdashboard.feature.splash.Splash
@@ -40,11 +40,11 @@ fun AppNavHost(
         )
         introductionScreen(navigateToLogin = navController::navigateToLogin)
         loginScreen(
-            navigateToConSecKeys = navController::navigateToConSecKeys,
-            navigateToQRCode = navController::navigateToQRCode
+            navigateToConSecKeys = navController::navigateToEnterShopAddress,
+            navigateToQRCode = {} // غیرفعال شده
         )
-        conSecKeysScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
-        qrCodeScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
+        // conSecKeysScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
+        // qrCodeScreen(navigateToEnterShopAddress = navController::navigateToEnterShopAddress)
         enterShopAddressNavigation(navigateToHome = { credentials ->
             viewModel.saveSiteAddress(credentials.address)
             viewModel.saveWpCredentials(credentials.wpUsername, credentials.wpAppPassword)

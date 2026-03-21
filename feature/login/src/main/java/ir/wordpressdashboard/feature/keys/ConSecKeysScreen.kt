@@ -38,20 +38,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ConSecKeysRoute(navigateToEnterShopAddress: () -> Unit) {
     var siteAddress by remember { mutableStateOf("") }
-    var consumerKey by remember { mutableStateOf("") }
-    var secretKey by remember { mutableStateOf("") }
     var wpUsername by remember { mutableStateOf("") }
     var wpAppPassword by remember { mutableStateOf("") }
 
     ConSecKeysScreen(
         siteAddress = siteAddress,
-        consumerKey = consumerKey,
-        secretKey = secretKey,
         wpUsername = wpUsername,
         wpAppPassword = wpAppPassword,
         onSiteAddressChanged = { siteAddress = it },
-        onConsumerKeyChanged = { consumerKey = it },
-        onSecretKeyChanged = { secretKey = it },
         onWpUsernameChanged = { wpUsername = it },
         onWpAppPasswordChanged = { wpAppPassword = it },
         onNextClick = navigateToEnterShopAddress
@@ -62,13 +56,9 @@ fun ConSecKeysRoute(navigateToEnterShopAddress: () -> Unit) {
 @Composable
 fun ConSecKeysScreen(
     siteAddress: String = "",
-    consumerKey: String = "",
-    secretKey: String = "",
     wpUsername: String = "",
     wpAppPassword: String = "",
     onSiteAddressChanged: (String) -> Unit,
-    onConsumerKeyChanged: (String) -> Unit,
-    onSecretKeyChanged: (String) -> Unit,
     onWpUsernameChanged: (String) -> Unit = {},
     onWpAppPasswordChanged: (String) -> Unit = {},
     onNextClick: () -> Unit
@@ -150,92 +140,92 @@ fun ConSecKeysScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // Consumer Key Input Box
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .fillMaxWidth()
-        ) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .background(inputBackground, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Column {
-                    Text(
-                        text = "کلید مصرف کننده",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    TextField(
-                        value = consumerKey,
-                        onValueChange = onConsumerKeyChanged,
-                        placeholder = { Text("") },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                }
-            }
-            Text(
-                text = "مثال:\nck_ef1b5aa967cgfb90e453be4671e80884dfbe4e16",
-                color = textColor,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
+        // Consumer Key Input Box - موقتاً غیرفعال شده
+        // Column(
+        //     modifier = Modifier
+        //         .padding(horizontal = 32.dp)
+        //         .fillMaxWidth()
+        // ) {
+        //     Box(
+        //         Modifier
+        //             .fillMaxWidth()
+        //             .background(inputBackground, RoundedCornerShape(8.dp))
+        //             .padding(horizontal = 16.dp, vertical = 12.dp)
+        //     ) {
+        //         Column {
+        //             Text(
+        //                 text = "کلید مصرف کننده",
+        //                 color = Color.Black,
+        //                 style = MaterialTheme.typography.bodyMedium
+        //             )
+        //             TextField(
+        //                 value = consumerKey,
+        //                 onValueChange = onConsumerKeyChanged,
+        //                 placeholder = { Text("") },
+        //                 colors = TextFieldDefaults.colors(
+        //                     focusedContainerColor = Color.Transparent,
+        //                     unfocusedContainerColor = Color.Transparent,
+        //                     disabledContainerColor = Color.Transparent,
+        //                     focusedIndicatorColor = Color.Transparent,
+        //                     unfocusedIndicatorColor = Color.Transparent
+        //                 ),
+        //                 modifier = Modifier.fillMaxWidth(),
+        //                 singleLine = true
+        //             )
+        //         }
+        //     }
+        //     Text(
+        //         text = "مثال:\nck_ef1b5aa967cgfb90e453be4671e80884dfbe4e16",
+        //         color = textColor,
+        //         style = MaterialTheme.typography.bodySmall,
+        //         modifier = Modifier.padding(top = 4.dp)
+        //     )
+        // }
 
-        Spacer(Modifier.height(24.dp))
+        // Spacer(Modifier.height(24.dp))
 
-        // Secret Key Input Box
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .fillMaxWidth()
-        ) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .background(inputBackground, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Column {
-                    Text(
-                        text = "رمز مصرف کننده",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    TextField(
-                        value = secretKey,
-                        onValueChange = onSecretKeyChanged,
-                        placeholder = { Text("") },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                }
-            }
-            Text(
-                text = "مثال:\ncs_7c584ec7704c60b47f9017c817d3db3fd81c1182",
-                color = textColor,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
+        // Secret Key Input Box - موقتاً غیرفعال شده
+        // Column(
+        //     modifier = Modifier
+        //         .padding(horizontal = 32.dp)
+        //         .fillMaxWidth()
+        // ) {
+        //     Box(
+        //         Modifier
+        //             .fillMaxWidth()
+        //             .background(inputBackground, RoundedCornerShape(8.dp))
+        //             .padding(horizontal = 16.dp, vertical = 12.dp)
+        //     ) {
+        //         Column {
+        //             Text(
+        //                 text = "رمز مصرف کننده",
+        //                 color = Color.Black,
+        //                 style = MaterialTheme.typography.bodyMedium
+        //             )
+        //             TextField(
+        //                 value = secretKey,
+        //                 onValueChange = onSecretKeyChanged,
+        //                 placeholder = { Text("") },
+        //                 colors = TextFieldDefaults.colors(
+        //                     focusedContainerColor = Color.Transparent,
+        //                     unfocusedContainerColor = Color.Transparent,
+        //                     disabledContainerColor = Color.Transparent,
+        //                     focusedIndicatorColor = Color.Transparent,
+        //                     unfocusedIndicatorColor = Color.Transparent
+        //                 ),
+        //                 modifier = Modifier.fillMaxWidth(),
+        //                 singleLine = true,
+        //                 visualTransformation = PasswordVisualTransformation()
+        //             )
+        //         }
+        //     }
+        //     Text(
+        //         text = "مثال:\ncs_7c584ec7704c60b47f9017c817d3db3fd81c1182",
+        //         color = textColor,
+        //         style = MaterialTheme.typography.bodySmall,
+        //         modifier = Modifier.padding(top = 4.dp)
+        //     )
+        // }
 
         Spacer(Modifier.height(24.dp))
 
@@ -325,7 +315,7 @@ fun ConSecKeysScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
                 .height(56.dp),
-            enabled = siteAddress.isNotBlank() && consumerKey.isNotBlank() && secretKey.isNotBlank()
+            enabled = siteAddress.isNotBlank() && wpUsername.isNotBlank() && wpAppPassword.isNotBlank()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -369,13 +359,9 @@ fun ConSecKeysScreen(
 fun PreviewConSecKeysScreen() {
     ConSecKeysScreen(
         siteAddress = "",
-        consumerKey = "",
-        secretKey = "",
         wpUsername = "",
         wpAppPassword = "",
         onSiteAddressChanged = {},
-        onConsumerKeyChanged = {},
-        onSecretKeyChanged = {},
         onWpUsernameChanged = {},
         onWpAppPasswordChanged = {},
         onNextClick = {}
