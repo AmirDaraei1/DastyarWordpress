@@ -20,5 +20,5 @@ class PostRemoteDataSource @Inject constructor(
     suspend fun updatePost(id: Int, title: String, content: String, status: String): PostDto =
         api.updatePost(id, UpdatePostRequest(title = title, content = content, status = status))
 
-    suspend fun deletePost(id: Int): PostDto = api.deletePost(id)
+    suspend fun deletePost(id: Int) { api.deletePost(id) }
 }

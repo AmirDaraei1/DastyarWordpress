@@ -106,8 +106,21 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
     var productToDelete by remember { mutableStateOf<Products?>(null) }
     var selectedPost by remember { mutableStateOf<ir.wordpressdashboard.model.Post?>(null) }
     var isCreatingPost by remember { mutableStateOf(false) }
+    var postRefreshTrigger by remember { mutableStateOf(0) }
+    var mediaRefreshTrigger by remember { mutableStateOf(0) }
+
     LaunchedEffect(Unit) {
         viewModel.loadProducts()
+    }
+
+    // وقتی تب عوض می‌شه، لیست اون تب رو refresh کن
+    LaunchedEffect(selectedTab) {
+        when (selectedTab) {
+            BottomNavItem.Products -> viewModel.refreshProducts()
+            BottomNavItem.Posts -> postRefreshTrigger++
+            BottomNavItem.Media -> mediaRefreshTrigger++
+            else -> Unit
+        }
     }
 
     // صفحه ویرایش محصول
@@ -153,7 +166,10 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             CreatePostScreen(
                 onBack = { isCreatingPost = false },
-                onPostCreated = { isCreatingPost = false }
+                onPostCreated = {
+                    isCreatingPost = false
+                    postRefreshTrigger++
+                }
             )
         }
         return
@@ -234,9 +250,12 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
                         onEditProduct = { product -> editingProduct = product }
                     )
                     BottomNavItem.CreateProduct -> CreateProductScreen()
-                    BottomNavItem.Media -> MediaListScreen()
+                    BottomNavItem.Media -> MediaListScreen(refreshTrigger = mediaRefreshTrigger)
                     BottomNavItem.Posts -> Box(modifier = Modifier.fillMaxSize()) {
-                        PostsListScreen(onPostClick = { selectedPost = it })
+                        PostsListScreen(
+                            onPostClick = { selectedPost = it },
+                            refreshTrigger = postRefreshTrigger
+                        )
                         FloatingActionButton(
                             onClick = { isCreatingPost = true },
                             modifier = Modifier

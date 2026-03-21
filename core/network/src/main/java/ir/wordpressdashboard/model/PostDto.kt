@@ -22,6 +22,12 @@ data class ContentDto(val rendered: String)
 data class ExcerptDto(val rendered: String)
 
 @Serializable
+data class DeletePostResponse(
+    val deleted: Boolean = false,
+    val previous: PostDto? = null
+)
+
+@Serializable
 data class UpdatePostRequest(
     val title: String,
     val content: String,

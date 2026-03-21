@@ -56,6 +56,7 @@ import ir.wordpressdashboard.model.Post
 @Composable
 fun PostsListScreen(
     onPostClick: (Post) -> Unit = {},
+    refreshTrigger: Int = 0,
     viewModel: PostsViewModel = hiltViewModel()
 ) {
     val posts = viewModel.posts
@@ -72,6 +73,10 @@ fun PostsListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) { viewModel.loadPosts() }
+
+    LaunchedEffect(refreshTrigger) {
+        if (refreshTrigger > 0) viewModel.refreshPosts()
+    }
 
     LaunchedEffect(deletePostSuccess) {
         if (deletePostSuccess) {
@@ -120,7 +125,7 @@ fun PostsListScreen(
             lastVisible >= total - 3 && total > 0
         }
     }
-    LaunchedEffect(shouldLoadMore) {
+    LaunchedEffect(shouldLoadMore, isLoadingMore) {
         if (shouldLoadMore && !isLoadingMore && hasMore && !isOffline)
             viewModel.loadNextPostsPage()
     }
@@ -220,8 +225,33 @@ fun PostsListScreen(
                         }
                     }
                     posts.isEmpty() -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "پستی یافت نشد", color = Color(0xFF999999), fontSize = 16.sp)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(32.dp)
+                        ) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Text(text = "📭", fontSize = 48.sp)
+                                        Text(
+                                            text = "پستی یافت نشد",
+                                            color = Color(0xFF999999),
+                                            fontSize = 16.sp
+                                        )
+                                        Text(
+                                            text = "برای بارگذاری مجدد به پایین بکشید",
+                                            color = Color(0xFFBBBBBB),
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                     else -> {

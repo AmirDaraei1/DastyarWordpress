@@ -62,7 +62,7 @@ import coil.request.ImageRequest
 import ir.wordpressdashboard.model.Media
 
 @Composable
-fun MediaListScreen(viewModel: MediaViewModel = hiltViewModel()) {
+fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltViewModel()) {
     val mediaList = viewModel.mediaList
     val isLoading = viewModel.isMediaLoading
     val isLoadingMore = viewModel.isLoadingMoreMedia
@@ -75,6 +75,10 @@ fun MediaListScreen(viewModel: MediaViewModel = hiltViewModel()) {
     var mediaToDelete by remember { mutableStateOf<Media?>(null) }
 
     LaunchedEffect(Unit) { viewModel.loadMedia() }
+
+    LaunchedEffect(refreshTrigger) {
+        if (refreshTrigger > 0) viewModel.refreshMedia()
+    }
 
     // نمایش صفحه detail
     if (selectedIndex >= 0) {

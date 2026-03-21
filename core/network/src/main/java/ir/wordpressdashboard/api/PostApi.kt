@@ -1,6 +1,7 @@
 package ir.wordpressdashboard.api
 
 import ir.wordpressdashboard.model.CreatePostRequest
+import ir.wordpressdashboard.model.DeletePostResponse
 import ir.wordpressdashboard.model.PostDto
 import ir.wordpressdashboard.model.UpdatePostRequest
 import retrofit2.http.Body
@@ -34,5 +35,5 @@ interface PostApi {
     suspend fun deletePost(
         @Path("id") id: Int,
         @Query("force") force: Boolean = true
-    ): PostDto
+    ): DeletePostResponse
 }
