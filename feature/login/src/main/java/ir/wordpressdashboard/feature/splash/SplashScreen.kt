@@ -85,7 +85,7 @@ fun SplashScreen(navigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "داشبورد وردپرس",
+                text = "دستیار وردپرس",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,

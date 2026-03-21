@@ -58,7 +58,7 @@ class CredentialsManager @Inject constructor(
     override fun getWpUsername(): String = prefs.getString(KEY_WP_USERNAME, "") ?: ""
     override fun getWpAppPassword(): String = prefs.getString(KEY_WP_APP_PASSWORD, "") ?: ""
     override fun isConfigured(): Boolean =
-        getConsumerKey().isNotEmpty() && getSecretKey().isNotEmpty() && getBaseUrl().isNotEmpty()
+        getBaseUrl().isNotEmpty() && getWpUsername().isNotEmpty() && getWpAppPassword().isNotEmpty()
     override fun hasWpCredentials(): Boolean =
         getWpUsername().isNotEmpty() && getWpAppPassword().isNotEmpty()
 

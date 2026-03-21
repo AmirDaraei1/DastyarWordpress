@@ -14,9 +14,10 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation(libs.coil.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
+    // CameraX حذف شد - از TakePicture intent استفاده می‌شود نه CameraX مستقیم
+    // implementation(libs.androidx.camera.camera2)
+    // implementation(libs.androidx.camera.lifecycle)
+    // implementation(libs.androidx.camera.view)
     implementation(libs.google.accompanist.permissions)
     implementation(libs.google.accompanist.swiperefresh)
 }

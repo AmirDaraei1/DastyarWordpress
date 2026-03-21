@@ -57,6 +57,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
@@ -87,7 +90,30 @@ import java.util.Locale
 
 @Composable
 fun HomeRoute() {
-    HomeScreen()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    var backPressedOnce by remember { mutableStateOf(false) }
+
+    BackHandler {
+        if (backPressedOnce) {
+            // دومین بار - خروج از اپ
+            android.os.Process.killProcess(android.os.Process.myPid())
+        } else {
+            backPressedOnce = true
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar("برای خروج دوباره بزنید")
+                backPressedOnce = false
+            }
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        HomeScreen()
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
 }
 
 @Composable

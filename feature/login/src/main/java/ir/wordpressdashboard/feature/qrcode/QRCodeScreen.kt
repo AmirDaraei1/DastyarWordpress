@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -99,26 +97,17 @@ fun QRCodeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Camera Preview with Scanner Frame
+                // Camera Preview with Scanner Frame - غیرفعال شده
                 Box(
                     Modifier
                         .size(280.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .border(4.dp, stepActive, RoundedCornerShape(20.dp))
+                        .background(Color(0xFFEEEEEE), RoundedCornerShape(20.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    QRCodeScanner(
-                        modifier = Modifier.fillMaxSize(),
-                        onQRCodeScanned = { code ->
-                            viewModel.onQRCodeScanned(code)
-                        }
-                    )
-
-                    // Scanner Frame Overlay
-                    Box(
-                        Modifier
-                            .size(220.dp)
-                            .align(Alignment.Center)
-                            .border(2.dp, Color.White, RoundedCornerShape(12.dp))
+                    Text(
+                        text = "QR Scanner\nغیرفعال شده",
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center
                     )
                 }
 
