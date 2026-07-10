@@ -12,7 +12,9 @@ android {
 dependencies {
     implementation(project(":core:network"))
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation(libs.coil.compose)
+    implementation(libs.coil.compose) {
+        exclude(group = "androidx.exifinterface", module = "exifinterface")
+    }
     implementation(libs.androidx.activity.compose)
     // CameraX حذف شد - از TakePicture intent استفاده می‌شود نه CameraX مستقیم
     // implementation(libs.androidx.camera.camera2)

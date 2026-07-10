@@ -44,11 +44,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":core:network"))
     implementation(project(":core:domain"))
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    
+     implementation(libs.androidx.room.runtime)
+     implementation(libs.androidx.room.ktx)
+     ksp(libs.androidx.room.compiler)
 
     // OkHttp for multipart upload
     implementation(libs.okhttp)
