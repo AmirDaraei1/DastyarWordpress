@@ -20,6 +20,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ir.wordpressdashboard.i18n.LocalStrings
+import ir.wordpressdashboard.i18n.resolve
 import ir.wordpressdashboard.model.Post
 
 @Composable
@@ -29,6 +31,7 @@ fun PostDetailScreen(
     onPostUpdated: (Post) -> Unit = {},
     viewModel: EditPostViewModel = hiltViewModel()
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
     var isEditMode by remember { mutableStateOf(false) }
 
@@ -83,12 +86,12 @@ fun PostDetailScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "بازگشت",
+                        contentDescription = strings.back,
                         tint = Color.White
                     )
                 }
                 Text(
-                    text = if (isEditMode) "ویرایش پست" else "جزئیات پست",
+                    text = if (isEditMode) strings.editPost else strings.postDetailsTitle,
                     color = Color.White,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
@@ -103,7 +106,7 @@ fun PostDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Edit,
-                            contentDescription = "ویرایش",
+                            contentDescription = strings.edit,
                             tint = Color.White
                         )
                     }
@@ -140,15 +143,15 @@ fun PostDetailScreen(
             PostStatusChip(status = status, editMode = isEditMode, onStatusChange = { status = it })
 
             // ── عنوان ─────────────────────────────────────────────────────
-            SectionLabel("عنوان پست")
+            SectionLabel(strings.resolve("عنوان پست"))
             if (isEditMode) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it; titleError = false },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("عنوان پست را وارد کنید") },
+                    placeholder = { Text(strings.postTitlePlaceholderText) },
                     isError = titleError,
-                    supportingText = if (titleError) { { Text("عنوان نمی‌تواند خالی باشد") } } else null,
+                    supportingText = if (titleError) { { Text(strings.postTitleRequiredText) } } else null,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = false,
@@ -160,7 +163,7 @@ fun PostDetailScreen(
 
             // ── تاریخ ─────────────────────────────────────────────────────
             if (!isEditMode && post.date.isNotEmpty()) {
-                SectionLabel("تاریخ انتشار")
+                SectionLabel(strings.publishDate)
                 InfoCard(text = post.date)
             }
 
@@ -168,13 +171,13 @@ fun PostDetailScreen(
             if (!isEditMode) {
                 val excerptClean = post.excerpt.replace(Regex("<[^>]+>"), "").trim()
                 if (excerptClean.isNotEmpty()) {
-                    SectionLabel("خلاصه")
+                    SectionLabel(strings.resolve("خلاصه"))
                     InfoCard(text = excerptClean)
                 }
             }
 
             // ── محتوا ─────────────────────────────────────────────────────
-            SectionLabel("محتوا")
+            SectionLabel(strings.resolve("محتوا"))
             if (isEditMode) {
                 OutlinedTextField(
                     value = content,
@@ -182,7 +185,7 @@ fun PostDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 180.dp),
-                    placeholder = { Text("محتوای پست را وارد کنید") },
+                    placeholder = { Text(strings.postContentPlaceholderText) },
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -218,7 +221,7 @@ fun PostDetailScreen(
                             strokeWidth = 2.5.dp
                         )
                     } else {
-                        Text("ذخیره تغییرات", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(strings.saveChanges, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -269,7 +272,12 @@ private fun PostStatusChip(
     editMode: Boolean,
     onStatusChange: (String) -> Unit
 ) {
-    val statuses = listOf("publish" to "منتشر شده", "draft" to "پیش‌نویس", "private" to "خصوصی")
+    val strings = LocalStrings.current
+    val statuses = listOf(
+        "publish" to strings.published,
+        "draft" to strings.draft,
+        "private" to strings.privateStatus
+    )
     val purple = Color(0xFF6251A6)
 
     Row(

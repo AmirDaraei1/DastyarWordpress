@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import ir.wordpressdashboard.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +49,7 @@ fun WpMediaPickerSheet(
     onImagesSelected: (List<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
     val mediaList = viewModel.mediaList.filter { it.mimeType.startsWith("image") }
     val isLoading = viewModel.isMediaLoading
@@ -91,7 +93,7 @@ fun WpMediaPickerSheet(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text(
-                    text = "انتخاب از تصاویر وردپرس",
+                    text = strings.wpMedia,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF222222),
@@ -108,7 +110,7 @@ fun WpMediaPickerSheet(
                             .padding(horizontal = 16.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            "تأیید (${selectedUrls.size})",
+                            strings.confirmSelectionCount(selectedUrls.size),
                             color = Color.White,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
@@ -132,7 +134,7 @@ fun WpMediaPickerSheet(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("تصویری یافت نشد", color = Color(0xFF999999), fontSize = 14.sp)
+                        Text(strings.noMediaFound, color = Color(0xFF999999), fontSize = 14.sp)
                     }
                 }
                 else -> {

@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import ir.wordpressdashboard.i18n.LocalStrings
+import ir.wordpressdashboard.i18n.resolve
 import ir.wordpressdashboard.model.Post
 
 @Composable
@@ -59,6 +61,7 @@ fun PostsListScreen(
     refreshTrigger: Int = 0,
     viewModel: PostsViewModel = hiltViewModel()
 ) {
+    val strings = LocalStrings.current
     val posts = viewModel.posts
     val isLoading = viewModel.isPostsLoading
     val isLoadingMore = viewModel.isLoadingMorePosts
@@ -80,7 +83,7 @@ fun PostsListScreen(
 
     LaunchedEffect(deletePostSuccess) {
         if (deletePostSuccess) {
-            snackbarHostState.showSnackbar("پست با موفقیت حذف شد")
+            snackbarHostState.showSnackbar(strings.postDeletedSuccess)
             viewModel.resetDeleteState()
         }
     }
@@ -97,8 +100,8 @@ fun PostsListScreen(
         val post = postToDelete!!
         AlertDialog(
             onDismissRequest = { postToDelete = null },
-            title = { Text("حذف پست", fontWeight = FontWeight.Bold) },
-            text = { Text("آیا از حذف پست «${post.title}» مطمئن هستید؟ این عمل قابل بازگشت نیست.") },
+            title = { Text(strings.deletePost, fontWeight = FontWeight.Bold) },
+            text = { Text(strings.deletePostConfirm(post.title.ifEmpty { strings.untitled })) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -106,12 +109,12 @@ fun PostsListScreen(
                         postToDelete = null
                     }
                 ) {
-                    Text("حذف", color = Color(0xFFD32F2F), fontWeight = FontWeight.Bold)
+                    Text(strings.yesDelete, color = Color(0xFFD32F2F), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { postToDelete = null }) {
-                    Text("انصراف")
+                    Text(strings.cancel)
                 }
             }
         )
@@ -155,7 +158,7 @@ fun PostsListScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "پست‌ها",
+                            text = strings.postsTitle,
                             color = Color.White,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
@@ -175,8 +178,7 @@ fun PostsListScreen(
                     ) {
                         Text(text = "📡", fontSize = 18.sp)
                         Text(
-                            text = if (posts.isNotEmpty()) "بدون اینترنت — نمایش داده‌های ذخیره شده"
-                            else "اینترنت در دسترس نیست",
+                            text = if (posts.isNotEmpty()) strings.offlineCachedData else strings.noInternet,
                             fontSize = 13.sp,
                             color = Color(0xFFE65100),
                             fontWeight = FontWeight.Medium,
@@ -201,13 +203,13 @@ fun PostsListScreen(
                             ) {
                                 Text(text = "📵", fontSize = 64.sp)
                                 Text(
-                                    text = "اینترنت در دسترس نیست",
+                                    text = strings.noInternet,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF444444)
                                 )
                                 Text(
-                                    text = "لطفاً اتصال اینترنت خود را بررسی کنید.",
+                                    text = strings.checkInternet,
                                     fontSize = 14.sp,
                                     color = Color(0xFF888888),
                                     textAlign = TextAlign.Center
@@ -219,7 +221,7 @@ fun PostsListScreen(
                                         .clickable { viewModel.loadPosts(force = true) }
                                         .padding(horizontal = 32.dp, vertical = 12.dp)
                                 ) {
-                                    Text("تلاش مجدد", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                    Text(strings.retry, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
@@ -240,12 +242,12 @@ fun PostsListScreen(
                                     ) {
                                         Text(text = "📭", fontSize = 48.sp)
                                         Text(
-                                            text = "پستی یافت نشد",
+                                            text = strings.noPostsFound,
                                             color = Color(0xFF999999),
                                             fontSize = 16.sp
                                         )
                                         Text(
-                                            text = "برای بارگذاری مجدد به پایین بکشید",
+                                            text = strings.pullToRefresh,
                                             color = Color(0xFFBBBBBB),
                                             fontSize = 13.sp
                                         )
@@ -293,7 +295,7 @@ fun PostsListScreen(
                                             .padding(vertical = 12.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text("همه پست‌ها بارگذاری شدند", color = Color(0xFFBBBBBB), fontSize = 12.sp)
+                                        Text(strings.allPostsLoaded, color = Color(0xFFBBBBBB), fontSize = 12.sp)
                                     }
                                 }
                             }
@@ -331,6 +333,7 @@ fun PostsListScreen(
 
 @Composable
 fun PostCard(post: Post, onClick: () -> Unit = {}, onDeleteClick: () -> Unit = {}) {
+    val strings = LocalStrings.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -361,7 +364,7 @@ fun PostCard(post: Post, onClick: () -> Unit = {}, onDeleteClick: () -> Unit = {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = post.title,
+                    text = post.title.ifEmpty { strings.untitled },
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF222222),
@@ -374,15 +377,15 @@ fun PostCard(post: Post, onClick: () -> Unit = {}, onDeleteClick: () -> Unit = {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "شناسه: ${post.id}",
+                        text = "${strings.resolve("شناسه")}: ${post.id}",
                         fontSize = 11.sp,
                         color = Color(0xFF9E9E9E)
                     )
                     if (post.status.isNotEmpty()) {
                         val (label, bg, fg) = when (post.status) {
-                            "publish" -> Triple("منتشر", Color(0xFFE8F5E9), Color(0xFF2E7D32))
-                            "draft" -> Triple("پیش‌نویس", Color(0xFFFFF9C4), Color(0xFFF57F17))
-                            "private" -> Triple("خصوصی", Color(0xFFE3F2FD), Color(0xFF1565C0))
+                            "publish" -> Triple(strings.published, Color(0xFFE8F5E9), Color(0xFF2E7D32))
+                            "draft" -> Triple(strings.draft, Color(0xFFFFF9C4), Color(0xFFF57F17))
+                            "private" -> Triple(strings.privateStatus, Color(0xFFE3F2FD), Color(0xFF1565C0))
                             else -> Triple(post.status, Color(0xFFF5F5F5), Color(0xFF666666))
                         }
                         Surface(
@@ -413,7 +416,7 @@ fun PostCard(post: Post, onClick: () -> Unit = {}, onDeleteClick: () -> Unit = {
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "حذف پست",
+                    contentDescription = strings.deletePost,
                     tint = Color(0xFFD32F2F),
                     modifier = Modifier.size(22.dp)
                 )

@@ -8,3 +8,7 @@
 .cxx
 local.properties
 .idea
+# Keystore — never commit to version control
+keystore.properties
+*.jks
+*.keystore

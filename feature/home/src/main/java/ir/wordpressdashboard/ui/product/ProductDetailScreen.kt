@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import ir.wordpressdashboard.i18n.LocalStrings
 import ir.wordpressdashboard.model.Products
 
 @Composable
@@ -60,11 +61,12 @@ fun ProductDetailScreen(
     product: Products,
     onBack: () -> Unit
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
     val (statusLabel, statusBg, statusFg) = when (product.stock_status) {
-        "instock"     -> Triple("✓ موجود در انبار", Color(0xFFE8F5E9), Color(0xFF2E7D32))
-        "onbackorder" -> Triple("⏳ پیش‌فروش",      Color(0xFFFFF3E0), Color(0xFFE65100))
-        else          -> Triple("✗ ناموجود",        Color(0xFFFFEBEE), Color(0xFFC62828))
+        "instock" -> Triple("✓ ${strings.inStock}", Color(0xFFE8F5E9), Color(0xFF2E7D32))
+        "onbackorder" -> Triple("⏳ ${strings.onBackorder}", Color(0xFFFFF3E0), Color(0xFFE65100))
+        else -> Triple("✗ ${strings.outOfStock}", Color(0xFFFFEBEE), Color(0xFFC62828))
     }
 
     // Handle system back button
@@ -161,7 +163,7 @@ fun ProductDetailScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "بازگشت",
+                        contentDescription = strings.back,
                         tint = Color.White
                     )
                 }
@@ -323,14 +325,14 @@ fun ProductDetailScreen(
                     }
                     if (product.price.isNotEmpty()) {
                         Text(
-                            text = "${formatPrice(product.price)} تومان",
+                            text = "${formatPrice(product.price, strings)} ${strings.priceUnit}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = purple
                         )
                     } else {
                         Text(
-                            text = "قیمت: تماس بگیرید",
+                            text = strings.contactForPrice,
                             fontSize = 14.sp,
                             color = Color(0xFF999999)
                         )
@@ -349,7 +351,7 @@ fun ProductDetailScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "توضیحات محصول",
+                            text = strings.description,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF222222)

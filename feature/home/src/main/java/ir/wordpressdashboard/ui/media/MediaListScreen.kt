@@ -59,10 +59,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import ir.wordpressdashboard.i18n.LocalStrings
+import ir.wordpressdashboard.i18n.resolve
 import ir.wordpressdashboard.model.Media
 
 @Composable
 fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltViewModel()) {
+    val strings = LocalStrings.current
+    val currentLayoutDirection = LocalLayoutDirection.current
     val mediaList = viewModel.mediaList
     val isLoading = viewModel.isMediaLoading
     val isLoadingMore = viewModel.isLoadingMoreMedia
@@ -82,7 +86,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
 
     // نمایش صفحه detail
     if (selectedIndex >= 0) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
             MediaDetailScreen(
                 mediaList = mediaList,
                 initialIndex = selectedIndex,
@@ -98,7 +102,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
             onDismissRequest = { mediaToDelete = null },
             title = {
                 Text(
-                    text = "حذف تصویر",
+                    text = strings.resolve("حذف تصویر"),
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
                     textAlign = TextAlign.Right,
@@ -107,7 +111,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
             },
             text = {
                 Text(
-                    text = "آیا از حذف «${mediaToDelete!!.title.ifEmpty { "این تصویر" }}» مطمئن هستید؟\nاین عمل قابل بازگشت نیست.",
+                    text = strings.deleteImageConfirm(mediaToDelete!!.title.ifEmpty { strings.untitled }),
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     textAlign = TextAlign.Right,
@@ -122,12 +126,12 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
                 ) {
-                    Text("بله، حذف شود", color = Color.White)
+                    Text(strings.yesDelete, color = Color.White)
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = { mediaToDelete = null }) {
-                    Text("انصراف")
+                    Text(strings.cancel)
                 }
             },
             shape = RoundedCornerShape(16.dp)
@@ -172,7 +176,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "تصاویر",
+                    text = strings.mediaTitle,
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -192,8 +196,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
             ) {
                 Text(text = "📡", fontSize = 18.sp)
                 Text(
-                    text = if (mediaList.isNotEmpty()) "بدون اینترنت — نمایش داده‌های ذخیره شده"
-                    else "اینترنت در دسترس نیست",
+                    text = if (mediaList.isNotEmpty()) strings.offlineCachedData else strings.noInternet,
                     fontSize = 13.sp,
                     color = Color(0xFFE65100),
                     fontWeight = FontWeight.Medium,
@@ -216,8 +219,8 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
                         modifier = Modifier.padding(32.dp)
                     ) {
                         Text(text = "📵", fontSize = 64.sp)
-                        Text("اینترنت در دسترس نیست", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF444444))
-                        Text("لطفاً اتصال اینترنت خود را بررسی کنید.", fontSize = 14.sp, color = Color(0xFF888888), textAlign = TextAlign.Center)
+                        Text(strings.noInternet, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF444444))
+                        Text(strings.checkInternet, fontSize = 14.sp, color = Color(0xFF888888), textAlign = TextAlign.Center)
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(24.dp))
@@ -225,14 +228,14 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
                                 .clickable { viewModel.loadMedia(force = true) }
                                 .padding(horizontal = 32.dp, vertical = 12.dp)
                         ) {
-                            Text("تلاش مجدد", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            Text(strings.retry, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
             mediaList.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("تصویری یافت نشد", color = Color(0xFF999999), fontSize = 16.sp)
+                    Text(strings.noMediaFound, color = Color(0xFF999999), fontSize = 16.sp)
                 }
             }
             else -> {
@@ -272,7 +275,7 @@ fun MediaListScreen(refreshTrigger: Int = 0, viewModel: MediaViewModel = hiltVie
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("همه تصاویر بارگذاری شدند", color = Color(0xFFBBBBBB), fontSize = 12.sp)
+                                Text(strings.allImagesLoaded, color = Color(0xFFBBBBBB), fontSize = 12.sp)
                             }
                         }
                     }
@@ -289,6 +292,7 @@ fun MediaGridItem(
     onClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {}
 ) {
+    val strings = LocalStrings.current
     val context = LocalContext.current
     Card(
         modifier = Modifier
@@ -342,7 +346,7 @@ fun MediaGridItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "حذف",
+                        contentDescription = strings.delete,
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
@@ -350,7 +354,7 @@ fun MediaGridItem(
             }
             Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
                 Text(
-                    text = media.title.ifEmpty { "بدون عنوان" },
+                    text = media.title.ifEmpty { strings.untitled },
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF222222),

@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             StarterTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavHost(modifier = Modifier.padding(innerPadding))
+                    AppNavHost(modifier = Modifier.fillMaxSize().padding(innerPadding))
                 }
             }
         }

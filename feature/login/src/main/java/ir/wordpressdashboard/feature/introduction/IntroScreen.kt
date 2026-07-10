@@ -37,37 +37,24 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import ir.wordpressdashboard.i18n.LocalStrings
 import kotlinx.coroutines.launch
 
-private val Purple = Color(0xFF6251A6)
-private val LightPurple = Color(0xFFEDE7F6)
+// New brand palette — matches the app icon
+private val Purple = Color(0xFF7C3AED)        // primary (same as the W in the logo)
+private val PurpleLight = Color(0xFFA78BFA)   // icon background purple
+private val PurpleSoft = Color(0xFFEDE9FE)    // pale tint for surfaces
+private val AccentYellow = Color(0xFFFFC93C)  // the sparkle
+private val DotInactive = Color(0xFFD6CCF5)
 
 data class IntroPageData(
     val icon: ImageVector,
     val title: String,
     val description: String,
     val iconTint: Color
-)
-
-private val introPages = listOf(
-    IntroPageData(
-        icon = Icons.Default.ShoppingCart,
-        title = "مدیریت محصولات",
-        description = "به راحتی محصولات فروشگاه WooCommerce خود را مشاهده، ایجاد، ویرایش و حذف کنید. قیمت، موجودی، تصاویر و دسته‌بندی را مستقیماً از گوشی مدیریت کنید.",
-        iconTint = Color(0xFF6251A6)
-    ),
-    IntroPageData(
-        icon = Icons.Default.Create,
-        title = "مدیریت پست‌ها",
-        description = "پست‌های وردپرس سایت خود را بخوانید، بنویسید و ویرایش کنید. محتوای سایت را در هر جا و هر زمان به‌روز نگه دارید.",
-        iconTint = Color(0xFF3F51B5)
-    ),
-    IntroPageData(
-        icon = Icons.Default.Star,
-        title = "مدیریت رسانه‌ها",
-        description = "تصاویر و فایل‌های کتابخانه رسانه سایت را مشاهده و آپلود کنید. عکس‌ها را مستقیماً از گوشی به سایت اضافه کنید.",
-        iconTint = Color(0xFF009688)
-    )
 )
 
 @Composable
@@ -80,8 +67,29 @@ fun IntroductionRoute(navigateToLogin: () -> Unit) {
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun IntroductionScreen(onFinish: () -> Unit) {
+    val strings = LocalStrings.current
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+    val introPages = listOf(
+        IntroPageData(
+            icon = Icons.Default.ShoppingCart,
+            title = strings.introPage1Title,
+            description = strings.introPage1Desc,
+            iconTint = Purple,
+        ),
+        IntroPageData(
+            icon = Icons.Default.Create,
+            title = strings.introPage2Title,
+            description = strings.introPage2Desc,
+            iconTint = PurpleLight,
+        ),
+        IntroPageData(
+            icon = Icons.Default.Star,
+            title = strings.introPage3Title,
+            description = strings.introPage3Desc,
+            iconTint = AccentYellow,
+        ),
+    )
 
     Column(
         modifier = Modifier
@@ -94,13 +102,13 @@ fun IntroductionScreen(onFinish: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    Brush.horizontalGradient(listOf(Color(0xFF4E54C8), Color(0xFF8F94FB)))
+                    Brush.horizontalGradient(listOf(PurpleLight, Purple))
                 )
                 .padding(vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "دستیار وردپرس",
+                text = strings.introHeaderTitle,
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -127,14 +135,15 @@ fun IntroductionScreen(onFinish: () -> Unit) {
                         .padding(horizontal = 4.dp)
                         .size(if (pagerState.currentPage == index) 12.dp else 8.dp)
                         .background(
-                            color = if (pagerState.currentPage == index) Purple else Color(0xFFBDBDBD),
+                            color = if (pagerState.currentPage == index) Purple else DotInactive,
                             shape = CircleShape
                         )
                 )
             }
         }
 
-        // Navigation Buttons
+        // Navigation Buttons — always LTR: Skip(left) | Next(right)
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,7 +155,7 @@ fun IntroductionScreen(onFinish: () -> Unit) {
         ) {
             if (pagerState.currentPage < introPages.size - 1) {
                 TextButton(onClick = { onFinish() }) {
-                    Text(text = "رد کردن", color = Purple, fontSize = 15.sp)
+                    Text(text = strings.introSkip, color = Purple, fontSize = 15.sp)
                 }
             }
 
@@ -170,13 +179,14 @@ fun IntroductionScreen(onFinish: () -> Unit) {
                     .height(48.dp)
             ) {
                 Text(
-                    text = if (pagerState.currentPage == introPages.size - 1) "شروع کنید" else "بعدی ←",
+                    text = if (pagerState.currentPage == introPages.size - 1) strings.introStart else strings.introNext,
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
         }
+        } // end CompositionLocalProvider
     }
 }
 
@@ -193,7 +203,7 @@ fun IntroPage(data: IntroPageData) {
         Box(
             modifier = Modifier
                 .size(140.dp)
-                .background(LightPurple, shape = CircleShape),
+                .background(PurpleSoft, shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(

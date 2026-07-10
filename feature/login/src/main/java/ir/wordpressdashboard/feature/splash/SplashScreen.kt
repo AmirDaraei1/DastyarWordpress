@@ -1,5 +1,6 @@
 package ir.wordpressdashboard.feature.splash
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.wordpressdashboard.feature.login.R
+import ir.wordpressdashboard.i18n.LocalStrings
 import kotlinx.coroutines.delay
+
+// Brand palette — same values as IntroductionScreen and the app icon
+private val Purple = Color(0xFF7C3AED)
+private val PurpleLight = Color(0xFFA78BFA)
 
 @Composable
 fun SplashRoute(
@@ -46,13 +51,15 @@ fun SplashRoute(
 
 @Composable
 fun SplashScreen(navigateToLogin: () -> Unit) {
+    val strings = LocalStrings.current
+
     LaunchedEffect(Unit) {
         delay(3000)
         navigateToLogin()
     }
 
     val gradient = Brush.verticalGradient(
-        colors = listOf(Color(0xFF4E54C8), Color(0xFF8F94FB))
+        colors = listOf(PurpleLight, Purple)
     )
 
     Box(
@@ -74,18 +81,17 @@ fun SplashScreen(navigateToLogin: () -> Unit) {
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_wp_logo),
-                    contentDescription = "WordPress Logo",
-                    tint = Color(0xFF0073AA),
-                    modifier = Modifier.size(80.dp)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "لوگوی دستیار وردپرس",
+                    modifier = Modifier.size(110.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "دستیار وردپرس",
+                text = strings.appName,
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -95,7 +101,7 @@ fun SplashScreen(navigateToLogin: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "مدیریت سایت WooCommerce",
+                text = strings.appSubtitle,
                 color = Color.White.copy(alpha = 0.85f),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Normal,
@@ -105,7 +111,7 @@ fun SplashScreen(navigateToLogin: () -> Unit) {
 
         // نسخه در پایین صفحه
         Text(
-            text = "نسخه ۱.۰",
+            text = strings.version,
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 13.sp,
             modifier = Modifier

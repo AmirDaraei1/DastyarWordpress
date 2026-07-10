@@ -1,6 +1,7 @@
 ﻿package ir.wordpressdashboard.ui.product
 
 import ir.wordpressdashboard.ui.navigation.BottomNavItem
+import ir.wordpressdashboard.ui.navigation.label
 import ir.wordpressdashboard.ui.create_product.CreateProductScreen
 import ir.wordpressdashboard.ui.media.MediaListScreen
 import ir.wordpressdashboard.ui.post.PostsListScreen
@@ -76,11 +77,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import ir.wordpressdashboard.i18n.AppStrings
+import ir.wordpressdashboard.i18n.LocalStrings
+import ir.wordpressdashboard.i18n.isEnglish
+import ir.wordpressdashboard.i18n.resolve
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ir.wordpressdashboard.model.ProductImage
@@ -90,6 +97,7 @@ import java.util.Locale
 
 @Composable
 fun HomeRoute() {
+    val strings = LocalStrings.current
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var backPressedOnce by remember { mutableStateOf(false) }
@@ -101,7 +109,7 @@ fun HomeRoute() {
         } else {
             backPressedOnce = true
             coroutineScope.launch {
-                snackbarHostState.showSnackbar("برای خروج دوباره بزنید")
+                snackbarHostState.showSnackbar(strings.pressAgainToExit)
                 backPressedOnce = false
             }
         }
@@ -118,6 +126,8 @@ fun HomeRoute() {
 
 @Composable
 fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
+    val strings = LocalStrings.current
+    val currentLayoutDirection = LocalLayoutDirection.current
     val products = viewModel.products
     val isLoading = viewModel.isLoading
     val isLoadingMore = viewModel.isLoadingMore
@@ -151,7 +161,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
 
     // صفحه ویرایش محصول
     if (editingProduct != null) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
             EditProductScreen(
                 product = editingProduct!!,
                 onBack = { editingProduct = null },
@@ -166,7 +176,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
 
     // صفحه جزئیات محصول
     if (selectedProduct != null) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
             ProductDetailScreen(
                 product = selectedProduct!!,
                 onBack = { selectedProduct = null }
@@ -177,7 +187,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
 
     // صفحه جزئیات / ویرایش پست
     if (selectedPost != null) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
             PostDetailScreen(
                 post = selectedPost!!,
                 onBack = { selectedPost = null },
@@ -189,7 +199,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
 
     // صفحه ایجاد پست جدید
     if (isCreatingPost) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
             CreatePostScreen(
                 onBack = { isCreatingPost = false },
                 onPostCreated = {
@@ -207,7 +217,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
             onDismissRequest = { productToDelete = null },
             title = {
                 Text(
-                    text = "حذف محصول",
+                    text = strings.resolve("حذف محصول"),
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
                     textAlign = TextAlign.Right,
@@ -216,7 +226,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
             },
             text = {
                 Text(
-                    text = "آیا از حذف «${productToDelete!!.name}» مطمئن هستید؟\nاین عمل قابل بازگشت نیست.",
+                    text = strings.deleteProductConfirm(productToDelete!!.name.ifEmpty { strings.untitled }),
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     textAlign = TextAlign.Right,
@@ -231,19 +241,19 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
                 ) {
-                    Text("بله، حذف شود", color = Color.White)
+                    Text(strings.yesDelete, color = Color.White)
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = { productToDelete = null }) {
-                    Text("انصراف")
+                    Text(strings.cancel)
                 }
             },
             shape = RoundedCornerShape(16.dp)
         )
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+    CompositionLocalProvider(LocalLayoutDirection provides currentLayoutDirection) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             contentWindowInsets = WindowInsets(0),
@@ -292,7 +302,7 @@ fun HomeScreen(viewModel: ProductsViewModel = hiltViewModel()) {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "ایجاد پست جدید"
+                                contentDescription = strings.createNewPostTitle
                             )
                         }
                     }
@@ -307,6 +317,7 @@ fun AppBottomNavigationBar(
     selectedItem: BottomNavItem,
     onItemSelected: (BottomNavItem) -> Unit
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
     val items = BottomNavItem.entries
 
@@ -324,13 +335,13 @@ fun AppBottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label,
+                        contentDescription = item.label(strings),
                         modifier = Modifier.size(24.dp)
                     )
                 },
                 label = {
                     Text(
-                        text = item.label,
+                        text = item.label(strings),
                         fontSize = 10.sp,
                         maxLines = 1
                     )
@@ -364,6 +375,7 @@ fun HomeScreenContent(
     onDeleteProduct: (Products) -> Unit = {},
     onEditProduct: (Products) -> Unit = {}
 ) {
+    val strings = LocalStrings.current
     val listState = rememberLazyListState()
 
     val shouldLoadMore by remember {
@@ -404,7 +416,7 @@ fun HomeScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "محصولات",
+                    text = strings.productsTitle,
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -424,10 +436,7 @@ fun HomeScreenContent(
             ) {
                 Text(text = "📡", fontSize = 18.sp)
                 Text(
-                    text = if (isShowingCachedData)
-                        "بدون اینترنت — نمایش داده‌های ذخیره شده"
-                    else
-                        "اینترنت در دسترس نیست",
+                    text = if (isShowingCachedData) strings.offlineCachedData else strings.noInternet,
                     fontSize = 13.sp,
                     color = Color(0xFFE65100),
                     fontWeight = FontWeight.Medium,
@@ -458,16 +467,16 @@ fun HomeScreenContent(
                     ) {
                         Text(text = "📵", fontSize = 64.sp)
                         Text(
-                            text = "اینترنت در دسترس نیست",
+                            text = strings.noInternet,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF444444)
                         )
                         Text(
-                            text = "لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.",
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF888888),
-                                    textAlign = TextAlign.Center
+                            text = strings.checkInternetAndRetry,
+                            fontSize = 14.sp,
+                            color = Color(0xFF888888),
+                            textAlign = TextAlign.Center
                         )
                         Box(
                             modifier = Modifier
@@ -477,7 +486,7 @@ fun HomeScreenContent(
                                 .padding(horizontal = 32.dp, vertical = 12.dp)
                         ) {
                             Text(
-                                text = "تلاش مجدد",
+                                text = strings.retry,
                                 color = Color.White,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
@@ -492,7 +501,7 @@ fun HomeScreenContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "محصولی یافت نشد",
+                        text = strings.resolve("محصولی یافت نشد"),
                         color = Color(0xFF999999),
                         fontSize = 16.sp
                     )
@@ -542,7 +551,7 @@ fun HomeScreenContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "همه محصولات بارگذاری شدند",
+                                    text = strings.allProductsLoaded,
                                     color = Color(0xFFBBBBBB),
                                     fontSize = 12.sp
                                 )
@@ -561,6 +570,7 @@ fun ProductCard(
     product: Products,
     onClick: () -> Unit = {}
 ) {
+    val strings = LocalStrings.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -586,11 +596,35 @@ fun ProductCard(
             ) {
                 val imageUrl = product.images.firstOrNull()?.src
                 if (!imageUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = imageUrl,
+                    val context = LocalContext.current
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = product.name,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        loading = {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF6251A6),
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            }
+                        },
+                        error = {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "📦", fontSize = 28.sp)
+                            }
+                        }
                     )
                 } else {
                     Text(text = "📦", fontSize = 28.sp)
@@ -617,9 +651,9 @@ fun ProductCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val (statusText, statusColor) = when (product.stock_status) {
-                    "instock"     -> "✓ موجود"      to Color(0xFF4CAF50)
-                    "onbackorder" -> "⏳ پیش‌فروش"  to Color(0xFFE65100)
-                    else          -> "✗ ناموجود"    to Color(0xFFE53935)
+                    "instock" -> "✓ ${strings.inStock}" to Color(0xFF4CAF50)
+                    "onbackorder" -> "⏳ ${strings.onBackorder}" to Color(0xFFE65100)
+                    else -> "✗ ${strings.outOfStock}" to Color(0xFFE53935)
                 }
                 Text(
                     text = statusText,
@@ -632,14 +666,14 @@ fun ProductCard(
 
                 if (product.price.isNotEmpty()) {
                     Text(
-                        text = "${formatPrice(product.price)} تومان",
+                        text = "${formatPrice(product.price, strings)} ${strings.priceUnit}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF6251A6)
                     )
                 } else {
                     Text(
-                        text = "قیمت: تماس بگیرید",
+                        text = strings.contactForPrice,
                         fontSize = 13.sp,
                         color = Color(0xFF999999)
                     )
@@ -649,10 +683,12 @@ fun ProductCard(
     }
 }
 
-fun formatPrice(price: String): String {
+fun formatPrice(price: String, strings: AppStrings): String {
     return try {
         val number = price.toBigDecimal().toLong()
-        NumberFormat.getNumberInstance(Locale("fa", "IR")).format(number)
+        NumberFormat.getNumberInstance(
+            if (strings.isEnglish) Locale.US else Locale("fa", "IR")
+        ).format(number)
     } catch (_: Exception) {
         price
     }
@@ -698,6 +734,7 @@ fun SwipeActionsRow(
     onDelete: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val strings = LocalStrings.current
     val actionWidth = 140.dp   // total width of the two buttons revealed
     val scope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
@@ -728,12 +765,12 @@ fun SwipeActionsRow(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "ویرایش",
+                        contentDescription = strings.edit,
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text("ویرایش", color = Color.White, fontSize = 11.sp)
+                    Text(strings.edit, color = Color.White, fontSize = 11.sp)
                 }
             }
             // Delete button
@@ -753,12 +790,12 @@ fun SwipeActionsRow(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "حذف",
+                        contentDescription = strings.delete,
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text("حذف", color = Color.White, fontSize = 11.sp)
+                    Text(strings.delete, color = Color.White, fontSize = 11.sp)
                 }
             }
         }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import ir.wordpressdashboard.i18n.LocalStrings
 import ir.wordpressdashboard.model.Media
 
 @Composable
@@ -40,6 +41,7 @@ fun MediaDetailScreen(
     initialIndex: Int = 0,
     onBack: () -> Unit
 ) {
+    val strings = LocalStrings.current
     BackHandler { onBack() }
 
     val imageItems = mediaList.filter { it.mimeType.startsWith("image") }
@@ -125,14 +127,14 @@ fun MediaDetailScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "بازگشت",
+                        contentDescription = strings.back,
                         tint = Color.White
                     )
                 }
 
                 val current = imageItems.getOrNull(pagerState.currentPage)
                 Text(
-                    text = current?.title?.ifEmpty { "تصویر ${pagerState.currentPage + 1}" } ?: "",
+                    text = current?.title?.ifEmpty { strings.imageCounterTitle(pagerState.currentPage + 1) } ?: "",
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
@@ -144,7 +146,7 @@ fun MediaDetailScreen(
                 )
 
                 Text(
-                    text = "${pagerState.currentPage + 1} / ${imageItems.size}",
+                    text = strings.imagePosition(pagerState.currentPage + 1, imageItems.size),
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 13.sp,
                     modifier = Modifier

@@ -65,7 +65,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.wordpressdashboard.i18n.LocalStrings
+import ir.wordpressdashboard.i18n.resolve
 import kotlinx.coroutines.delay
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 
 data class ShopCredentials(
     val address: String,
@@ -84,47 +89,53 @@ private data class GuideStep(
 
 // ─── مراحل راهنما ──────────────────────────────────────────────────────────
 @Composable
-private fun guideSteps(): List<GuideStep> = listOf(
+private fun guideSteps(): List<GuideStep> {
+    val strings = LocalStrings.current
+
+    return listOf(
     GuideStep(
         stepNumber = 1,
-        title = "وارد پنل وردپرس شوید",
-        description = "به آدرس سایت/wp-admin بروید و وارد حساب کاربری شوید",
+        title = strings.step1Title,
+        description = strings.step1Desc,
         icon = Icons.Default.Person,
         mockContent = { MockWpLoginPanel() }
     ),
     GuideStep(
         stepNumber = 2,
-        title = "روی نام کاربری کلیک کنید",
-        description = "در بالای صفحه روی نام کاربری یا «پروفایل» کلیک کنید",
+        title = strings.step2Title,
+        description = strings.step2Desc,
         icon = Icons.Default.AccountCircle,
         mockContent = { MockWpAdminBar() }
     ),
     GuideStep(
         stepNumber = 3,
-        title = "به بخش Application Passwords بروید",
-        description = "در صفحه پروفایل، به پایین اسکرول کنید تا «رمزهای عبور برنامه» را ببینید",
+        title = strings.step3Title,
+        description = strings.step3Desc,
         icon = Icons.Default.Lock,
         mockContent = { MockAppPasswordSection() }
     ),
     GuideStep(
         stepNumber = 4,
-        title = "رمز جدید بسازید",
-        description = "یک نام وارد کنید (مثلاً «دستیار وردپرس») و روی «افزودن» کلیک کنید",
+        title = strings.step4Title,
+        description = strings.step4Desc,
         icon = Icons.Default.Add,
         mockContent = { MockAddPasswordForm() }
     ),
     GuideStep(
         stepNumber = 5,
-        title = "رمز 16 رقمی را کپی کنید",
-        description = "رمز نمایش داده شده را کپی کرده و در اینجا وارد کنید",
+        title = strings.step5Title,
+        description = strings.step5Desc,
         icon = Icons.Default.Share,
         mockContent = { MockPasswordResult() }
     )
 )
+}
 
 // ─── Mock صفحه لاگین وردپرس ────────────────────────────────────────────────
 @Composable
 private fun MockWpLoginPanel() {
+    val strings = LocalStrings.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,9 +152,9 @@ private fun MockWpLoginPanel() {
             Text("W", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         }
         Spacer(Modifier.height(8.dp))
-        MockField("نام کاربری")
+        MockField(strings.wpUsername)
         Spacer(Modifier.height(4.dp))
-        MockField("رمز عبور", isPassword = true)
+        MockField(strings.wpPassword, isPassword = true)
         Spacer(Modifier.height(6.dp))
         Box(
             modifier = Modifier
@@ -152,7 +163,7 @@ private fun MockWpLoginPanel() {
                 .padding(vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("ورود به سایت", color = Color.White, fontSize = 11.sp)
+            Text(strings.loginToSite, color = Color.White, fontSize = 11.sp)
         }
     }
 }
@@ -160,6 +171,8 @@ private fun MockWpLoginPanel() {
 // ─── Mock نوار ادمین وردپرس ─────────────────────────────────────────────────
 @Composable
 private fun MockWpAdminBar() {
+    val strings = LocalStrings.current
+
     Column(modifier = Modifier.fillMaxWidth()) {
         // نوار بالا
         Row(
@@ -170,7 +183,7 @@ private fun MockWpAdminBar() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("🏠  سایت من", color = Color.White, fontSize = 10.sp)
+            Text(strings.mySite, color = Color.White, fontSize = 10.sp)
             // نام کاربری با انیمیشن پالس
             val infiniteTransition = rememberInfiniteTransition(label = "pulse")
             val alpha by infiniteTransition.animateFloat(
@@ -187,7 +200,7 @@ private fun MockWpAdminBar() {
             ) {
                 Icon(Icons.Default.AccountCircle, null, tint = Color.White, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("مدیر سایت", color = Color.White, fontSize = 10.sp)
+                Text(strings.siteAdmin, color = Color.White, fontSize = 10.sp)
             }
         }
         // منوی dropdown
@@ -198,7 +211,7 @@ private fun MockWpAdminBar() {
                 .background(Color.White)
                 .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
         ) {
-            listOf("پروفایل", "ویرایش پروفایل", "خروج").forEachIndexed { i, item ->
+            listOf(strings.profile, strings.editProfile, strings.logout).forEachIndexed { i, item ->
                 Text(
                     text = item,
                     fontSize = 10.sp,
@@ -217,6 +230,8 @@ private fun MockWpAdminBar() {
 // ─── Mock بخش Application Passwords ────────────────────────────────────────
 @Composable
 private fun MockAppPasswordSection() {
+    val strings = LocalStrings.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,8 +239,8 @@ private fun MockAppPasswordSection() {
             .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(6.dp))
             .padding(10.dp)
     ) {
-        Text("رمزهای عبور برنامه", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1D2327))
-        Text("با رمزهای عبور برنامه، احراز هویت بدون نیاز به رمز اصلی", fontSize = 9.sp, color = Color.Gray)
+        Text(strings.appPasswords, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFF1D2327))
+        Text(strings.appPasswordsDesc, fontSize = 9.sp, color = Color.Gray)
         Spacer(Modifier.height(8.dp))
         // انیمیشن اسکرول
         val infiniteTransition = rememberInfiniteTransition(label = "scroll")
@@ -250,15 +265,16 @@ private fun MockAppPasswordSection() {
             )
         }
         Spacer(Modifier.height(6.dp))
-        Text("↓ اسکرول کنید تا به این بخش برسید", fontSize = 9.sp, color = Color(0xFF0073AA))
+        Text(strings.resolve("↓ اسکرول کنید تا به این بخش برسید"), fontSize = 9.sp, color = Color(0xFF0073AA))
     }
 }
 
 // ─── Mock فرم افزودن رمز ────────────────────────────────────────────────────
 @Composable
 private fun MockAddPasswordForm() {
+    val strings = LocalStrings.current
     var typed by remember { mutableStateOf("") }
-    val fullText = "دستیار وردپرس"
+    val fullText = strings.appName
     LaunchedEffect(Unit) {
         delay(500)
         fullText.forEach { char ->
@@ -273,7 +289,7 @@ private fun MockAddPasswordForm() {
             .border(1.dp, Color(0xFFDDDDDD), RoundedCornerShape(6.dp))
             .padding(10.dp)
     ) {
-        Text("افزودن رمز عبور برنامه جدید", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+        Text(strings.resolve("افزودن رمز عبور برنامه جدید"), fontWeight = FontWeight.Bold, fontSize = 11.sp)
         Spacer(Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -283,7 +299,7 @@ private fun MockAddPasswordForm() {
                     .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = if (typed.isEmpty()) "نام برنامه..." else typed,
+                    text = if (typed.isEmpty()) strings.resolve("نام برنامه...") else typed,
                     fontSize = 11.sp,
                     color = if (typed.isEmpty()) Color.Gray else Color(0xFF1D2327)
                 )
@@ -300,7 +316,7 @@ private fun MockAddPasswordForm() {
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("افزودن", color = Color.White, fontSize = 10.sp)
+                Text(strings.resolve("افزودن"), color = Color.White, fontSize = 10.sp)
             }
         }
     }
@@ -309,6 +325,7 @@ private fun MockAddPasswordForm() {
 // ─── Mock نمایش رمز ساخته شده ───────────────────────────────────────────────
 @Composable
 private fun MockPasswordResult() {
+    val strings = LocalStrings.current
     val infiniteTransition = rememberInfiniteTransition(label = "copy")
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.5f, targetValue = 1f,
@@ -325,7 +342,7 @@ private fun MockPasswordResult() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Check, null, tint = Color(0xFF27AE60), modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(4.dp))
-            Text("رمز عبور ساخته شد!", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = Color(0xFF27AE60))
+            Text(strings.resolve("رمز عبور ساخته شد!"), fontWeight = FontWeight.Bold, fontSize = 11.sp, color = Color(0xFF27AE60))
         }
         Spacer(Modifier.height(8.dp))
         Row(
@@ -353,7 +370,7 @@ private fun MockPasswordResult() {
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            "⚠️ این رمز فقط یک‌بار نمایش داده می‌شود!",
+            strings.resolve("⚠️ این رمز فقط یک‌بار نمایش داده می‌شود!"),
             fontSize = 9.sp,
             color = Color(0xFFE74C3C),
             fontWeight = FontWeight.Bold
@@ -382,6 +399,7 @@ private fun MockField(label: String, isPassword: Boolean = false) {
 // ─── ویجت انیمیشن راهنما (اصلی) ───────────────────────────────────────────
 @Composable
 fun AppPasswordGuideWidget() {
+    val strings = LocalStrings.current
     val steps = guideSteps()
     var currentStep by remember { mutableIntStateOf(0) }
     var isExpanded by remember { mutableStateOf(false) }
@@ -421,13 +439,13 @@ fun AppPasswordGuideWidget() {
                 Spacer(Modifier.width(8.dp))
                 Column {
                     Text(
-                        "چطور رمز 16 رقمی بسازم؟",
+                        strings.guideWidgetTitle,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         color = Color(0xFF6251A6)
                     )
                     Text(
-                        "راهنمای گام به گام",
+                        strings.guideWidgetSubtitle,
                         fontSize = 10.sp,
                         color = Color.Gray
                     )
@@ -515,14 +533,15 @@ fun AppPasswordGuideWidget() {
 
                 Spacer(Modifier.height(10.dp))
 
-                // دکمه‌های ناوبری
+                // دکمه‌های ناوبری — always LTR: Previous(left) | Counter(center) | Next(right)
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     if (currentStep > 0) {
                         Text(
-                            "◀ قبلی",
+                            text = strings.previous,
                             color = Color(0xFF6251A6),
                             fontSize = 12.sp,
                             modifier = Modifier.clickable { currentStep-- }
@@ -530,21 +549,21 @@ fun AppPasswordGuideWidget() {
                     } else Spacer(Modifier.width(1.dp))
 
                     Text(
-                        "${currentStep + 1} از ${steps.size}",
+                        strings.stepCounter(currentStep + 1, steps.size),
                         fontSize = 11.sp,
                         color = Color.Gray
                     )
 
                     if (currentStep < steps.size - 1) {
                         Text(
-                            "بعدی ▶",
+                            text = strings.nextSimple,
                             color = Color(0xFF6251A6),
                             fontSize = 12.sp,
                             modifier = Modifier.clickable { currentStep++ }
                         )
                     } else {
                         Text(
-                            "✓ فهمیدم",
+                            text = strings.gotIt,
                             color = Color(0xFF27AE60),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -552,6 +571,7 @@ fun AppPasswordGuideWidget() {
                         )
                     }
                 }
+                } // end CompositionLocalProvider
             }
         }
     }
@@ -588,6 +608,7 @@ fun EnterShopAddressScreen(
     onWpAppPasswordChanged: (String) -> Unit = {},
     onNextClick: () -> Unit
 ) {
+    val strings = LocalStrings.current
     val primaryPurple   = Color(0xFF5850A6)
     val lightGray       = Color(0xFFE0E0E0)
     val backgroundColor = Color(0xFFFAFAFA)
@@ -609,12 +630,12 @@ fun EnterShopAddressScreen(
             AppPasswordGuideWidget()
 
             // ── آدرس سایت ─────────────────────────────────────────────────
-            Text("آدرس سایت", color = Color.Black,
+            Text(strings.siteAddressLabel, color = Color.Black,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right)
             TextField(
                 value = address, onValueChange = onSiteAddressEntered,
-                placeholder = { Text("https://www.example.com", color = Color.Gray) },
+                placeholder = { Text(strings.siteAddressPlaceholder, color = Color.Gray) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = lightGray, unfocusedContainerColor = lightGray,
                     focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
@@ -624,12 +645,12 @@ fun EnterShopAddressScreen(
             )
 
             // ── نام کاربری ────────────────────────────────────────────────
-            Text("نام کاربری وردپرس", color = Color.Black,
+            Text(strings.usernameLabel, color = Color.Black,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right)
             TextField(
                 value = wpUsername, onValueChange = onWpUsernameChanged,
-                placeholder = { Text("admin", color = Color.Gray) },
+                placeholder = { Text(strings.usernamePlaceholder, color = Color.Gray) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = lightGray, unfocusedContainerColor = lightGray,
                     focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
@@ -639,12 +660,12 @@ fun EnterShopAddressScreen(
             )
 
             // ── رمز 16 رقمی ───────────────────────────────────────────────
-            Text("رمز عبور برنامه (16 رقمی)", color = Color.Black,
+            Text(strings.appPasswordLabel, color = Color.Black,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right)
             TextField(
                 value = wpAppPassword, onValueChange = onWpAppPasswordChanged,
-                placeholder = { Text("xxxx xxxx xxxx xxxx xxxx xxxx", color = Color.Gray) },
+                placeholder = { Text(strings.appPasswordPlaceholder, color = Color.Gray) },
                 visualTransformation = PasswordVisualTransformation(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = lightGray, unfocusedContainerColor = lightGray,
@@ -654,7 +675,7 @@ fun EnterShopAddressScreen(
                 shape = RoundedCornerShape(8.dp), singleLine = true
             )
             Text(
-                "راهنمای بالا را ببینید تا بدانید چطور رمز بسازید ↑",
+                strings.seeGuideHint,
                 color = Color(0xFF6251A6), fontSize = 11.sp,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right
             )
@@ -671,7 +692,7 @@ fun EnterShopAddressScreen(
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = Color.White, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("ورود", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                Text(strings.connectButton, color = Color.White, style = MaterialTheme.typography.titleMedium)
             }
         }
     }

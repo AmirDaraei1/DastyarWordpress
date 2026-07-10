@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ir.wordpressdashboard.i18n.LocalStrings
 import ir.wordpressdashboard.model.Post
 
 @Composable
@@ -28,6 +29,7 @@ fun CreatePostScreen(
     onPostCreated: (Post) -> Unit = {},
     viewModel: CreatePostViewModel = hiltViewModel()
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
 
     var title by remember { mutableStateOf("") }
@@ -87,12 +89,12 @@ fun CreatePostScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "بازگشت",
+                            contentDescription = strings.back,
                             tint = Color.White
                         )
                     }
                     Text(
-                        text = "ایجاد پست جدید",
+                        text = strings.createNewPostTitle,
                         color = Color.White,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
@@ -126,11 +128,11 @@ fun CreatePostScreen(
                 }
 
                 // ── وضعیت ──────────────────────────────────────────────
-                CreatePostSectionLabel("وضعیت پست")
+                CreatePostSectionLabel(strings.postStatusLabel)
                 CreatePostStatusChip(status = status, onStatusChange = { status = it })
 
                 // ── عنوان ──────────────────────────────────────────────
-                CreatePostSectionLabel("عنوان پست *")
+                CreatePostSectionLabel(strings.postTitleLabel)
                 OutlinedTextField(
                     value = title,
                     onValueChange = {
@@ -138,10 +140,10 @@ fun CreatePostScreen(
                         titleError = false
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("عنوان پست را وارد کنید") },
+                    placeholder = { Text(strings.postTitlePlaceholderText) },
                     isError = titleError,
                     supportingText = if (titleError) {
-                        { Text("عنوان نمی‌تواند خالی باشد", color = Color(0xFFC62828)) }
+                        { Text(strings.postTitleRequiredText, color = Color(0xFFC62828)) }
                     } else null,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -158,12 +160,12 @@ fun CreatePostScreen(
                 )
 
                 // ── خلاصه ──────────────────────────────────────────────
-                CreatePostSectionLabel("خلاصه (اختیاری)")
+                CreatePostSectionLabel(strings.postExcerptLabel)
                 OutlinedTextField(
                     value = excerpt,
                     onValueChange = { excerpt = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("خلاصه‌ای از پست بنویسید") },
+                    placeholder = { Text(strings.postExcerptPlaceholder) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
@@ -179,7 +181,7 @@ fun CreatePostScreen(
                 )
 
                 // ── محتوا ──────────────────────────────────────────────
-                CreatePostSectionLabel("محتوای پست *")
+                CreatePostSectionLabel(strings.postContentLabel)
                 OutlinedTextField(
                     value = content,
                     onValueChange = {
@@ -189,10 +191,10 @@ fun CreatePostScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 220.dp),
-                    placeholder = { Text("محتوای پست را اینجا بنویسید…") },
+                    placeholder = { Text(strings.postContentPlaceholderText) },
                     isError = contentError,
                     supportingText = if (contentError) {
-                        { Text("محتوا نمی‌تواند خالی باشد", color = Color(0xFFC62828)) }
+                        { Text(strings.postContentRequiredText, color = Color(0xFFC62828)) }
                     } else null,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -233,7 +235,7 @@ fun CreatePostScreen(
                     if (isCreating && status == "publish") {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                     } else {
-                        Text("انتشار", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(strings.publishButton, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -260,7 +262,7 @@ fun CreatePostScreen(
                     if (isCreating) {
                         CircularProgressIndicator(color = purple, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                     } else {
-                        Text("ذخیره به عنوان پیش‌نویس", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(strings.saveDraftButton, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -287,7 +289,7 @@ fun CreatePostScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         CircularProgressIndicator(color = purple)
-                        Text("در حال ایجاد پست…", fontSize = 14.sp, color = Color(0xFF444444))
+                        Text(strings.creatingPost, fontSize = 14.sp, color = Color(0xFF444444))
                     }
                 }
             }
@@ -322,12 +324,13 @@ private fun CreatePostStatusChip(
     status: String,
     onStatusChange: (String) -> Unit
 ) {
+    val strings = LocalStrings.current
     val purple = Color(0xFF6251A6)
     val statuses = listOf(
-        "publish" to "منتشر شده",
-        "draft" to "پیش‌نویس",
-        "private" to "خصوصی",
-        "pending" to "در انتظار بررسی"
+        "publish" to strings.published,
+        "draft" to strings.draft,
+        "private" to strings.privateStatus,
+        "pending" to strings.pendingReview
     )
 
     Row(

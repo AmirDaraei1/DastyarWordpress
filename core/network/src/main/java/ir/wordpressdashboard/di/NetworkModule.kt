@@ -56,7 +56,11 @@ abstract class NetworkModule {
         @Singleton
         fun provideOkHttpClient(credentialsManager: CredentialsManager): OkHttpClient {
             val logging = HttpLoggingInterceptor()
-            logging.level = HttpLoggingInterceptor.Level.BODY
+            // Log body only in debug builds — never expose credentials/responses in production
+            logging.level = if (credentialsManager.isDebugBuild)
+                HttpLoggingInterceptor.Level.BODY
+            else
+                HttpLoggingInterceptor.Level.NONE
 
             val authInterceptor = Interceptor { chain ->
                 val original = chain.request()
@@ -84,7 +88,10 @@ abstract class NetworkModule {
         @UploadRetrofit
         fun provideUploadOkHttpClient(credentialsManager: CredentialsManager): OkHttpClient {
             val logging = HttpLoggingInterceptor()
-            logging.level = HttpLoggingInterceptor.Level.BODY
+            logging.level = if (credentialsManager.isDebugBuild)
+                HttpLoggingInterceptor.Level.BODY
+            else
+                HttpLoggingInterceptor.Level.NONE
 
             val authInterceptor = Interceptor { chain ->
                 val original = chain.request()

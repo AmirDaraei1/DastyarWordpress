@@ -2,6 +2,7 @@ package ir.wordpressdashboard.provider
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
 import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.wordpressdashboard.repository.CredentialsRepository
@@ -15,6 +16,9 @@ class CredentialsManager @Inject constructor(
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences("wp_credentials", Context.MODE_PRIVATE)
+
+    val isDebugBuild: Boolean =
+        context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     @get:JvmName("getBaseUrlProp")
     var baseUrl: String

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.platform.LocalInspectionMode
+import ir.wordpressdashboard.i18n.LocalStrings
 
 @Composable
 fun LoginRoute(
@@ -101,6 +102,8 @@ fun LoginScreen(
     onNavItemSelected: (Int) -> Unit,
     selectIndex: Int
 ) {
+    val strings = LocalStrings.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +119,7 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "اتصال به سایت",
+                text = strings.connectToSite,
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -149,7 +152,7 @@ fun LoginScreen(
                 .height(56.dp)
         ) {
             Text(
-                text = "اتصال با رمز عبور برنامه",
+                text = strings.connectWithPassword,
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
@@ -180,7 +183,7 @@ fun LoginScreen(
 
         //3. Help Section
         Text(
-            text = "راهنما",
+            text = strings.helpTitle,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF4A4A4A),
             fontSize = 18.sp
@@ -189,7 +192,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "برای اتصال به سایت نیاز به راهنمایی داری ویدیوی بالا را ببین.",
+            text = strings.helpDescription,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
             color = Color(0xFF333333),
